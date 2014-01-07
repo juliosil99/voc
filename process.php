@@ -254,8 +254,16 @@ class Process
 		if(isset($_POST["remember"])){
 			$remember=true;
 		}
+		error_log(serialize($_POST));
 		$result=$session->login($_POST["username"], $_POST["password"], $remember);
 		if(isset($_SERVER['HTTP_REFERER'])) {
+
+			error_log("process.php:259");
+error_log($result);
+error_log(serialize($session));
+error_log(serialize($_SESSION));
+error_log(serialize(COOKIE_SECURE));
+error_log(serialize($_SERVER));
 			$ref =$_SERVER['HTTP_REFERER'];
 		}else {
 			$ref=SITE_URL;

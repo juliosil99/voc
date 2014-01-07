@@ -62,8 +62,13 @@ class Session
 		{
 			$this->username = $_SESSION['username'] = GUEST_NAME;
 			$this->userlevel = GUEST_LEVEL;
+					error_log("NOT LOGGED IN");error_log("NOT LOGGED IN");
 		}
+
+		error_log('session.php:66');
+error_log($this->logged_in);
 	}
+
 
 	function redirect($url)
 	{   ?>
@@ -94,6 +99,8 @@ class Session
 				$this->userid   = $_SESSION['userid']   = $_COOKIE['cookid'];
 			}
 		}
+		error_log("session.php:102");
+		error_log(serialize($_SESSION));
 		/* Username and userid have been set and not guest */
 		if(isset($_SESSION['username']) && isset($_SESSION['userid']) && $_SESSION['username'] != GUEST_NAME)
 		{
