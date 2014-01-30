@@ -23,9 +23,6 @@ zidisha_contents/
 # Folder Config File
 *Desktop.ini
 
-# Recycle Bin on File Shares
-$RECYCLE.BIN/
-
 # Mac Folder Metadata
 *.DS_Store
 
