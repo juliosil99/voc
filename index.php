@@ -10,12 +10,6 @@
 
 	// error_log("FOOO");
 	
-	//Anupam 22-11-201 redirect https://www.zidisha.org/index.php to https://www.zidisha.org/
-	if ($_SERVER['REQUEST_URI']=='/index.php')
-	{
-		header("HTTP/1.1 301 Moved Permanently");
-		header("Location: ".SITE_URL);
-	}
 	global $database,$session;
 	RedirectLoanprofileurl();
 	RedirectUserprofileurl();
