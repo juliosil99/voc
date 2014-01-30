@@ -62,7 +62,7 @@ Local links
 	/editables/about.php
 
 Constants file:
-	/lib/constant_local.php is the local version of /lib/constant.php
+	/library/constant_local.php is the local version of /library/constant.php
 	However IMO it is not needed to have two sepparate files.
 	Now the constant.php is .gitignored and its content is in constant-template.php
 	According to the environment the site is running in, every developer must cp constant-tempalte.php to constant.php and set their personal settings there.
