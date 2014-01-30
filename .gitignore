@@ -1,10 +1,27 @@
-.DS_Store
-Thumbs.db
+# =========================
+# Zidisha Specific
+# =========================
 
 # exclude .htaccess file used in dev environment
 /.htaccess
-
 *.htaccess
 
 library/constant.php
 zidisha_contents/
+
+# =========================
+# Operating System Detritus
+# =========================
+
+# Windows Image File Caches
+Thumbs.db
+ehthumbs.db
+
+# Folder Config File
+Desktop.ini
+
+# Recycle Bin on File Shares
+$RECYCLE.BIN/
+
+# Mac Folder Metadata
+.DS_Store
