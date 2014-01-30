@@ -17,14 +17,21 @@ zidisha_contents/
 # =========================
 
 # Windows Image File Caches
-Thumbs.db
-ehthumbs.db
+*Thumbs.db
+*ehthumbs.db
 
 # Folder Config File
-Desktop.ini
+*Desktop.ini
 
 # Recycle Bin on File Shares
 $RECYCLE.BIN/
 
 # Mac Folder Metadata
-.DS_Store
+*.DS_Store
+
+# =========================
+# Other Version Control Systems
+# =========================
+
+#Subversion files
+*.svn
