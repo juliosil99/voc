@@ -1,27 +1,57 @@
+AuthName "Zidisha Site"
+AuthUserFile "/home4/semfundc/.htpasswds/public_html/zidisha/passwd"
+
+# Server Errors
+ErrorDocument 400 /errors/400.shtml
+ErrorDocument 401 /errors/401.shtml
+ErrorDocument 403 /errors/403.shtml
+# ErrorDocument 404 /errors/404.shtml
+ErrorDocument 404 https://www.zidisha.org
+ErrorDocument 500 /errors/500.shtml
+
+# Static File Caching Headers
 <IfModule mod_expires.c>
    ExpiresActive On
    ExpiresDefault "access plus 10 days"
-   ExpiresByType text/css "access plus 1 week"
+   ExpiresByType text/css "access plus 1 month"
    ExpiresByType text/plain "access plus 1 month"
    ExpiresByType image/gif "access plus 1 month"
    ExpiresByType image/png "access plus 1 month"
    ExpiresByType image/jpeg "access plus 1 month"
    ExpiresByType application/x-javascript "access plus 1 month"
-   ExpiresByType application/javascript "access plus 1 week"
+   ExpiresByType application/javascript "access plus 1 month"
    ExpiresByType application/x-icon "access plus 1 year"
 </IfModule>
 
+# Compress Static Assets
+AddOutputFilterByType DEFLATE text/css text/javascript application/javascript application/x-javascript text/html text/xml
 
-AuthName "Zidisha Site"
-AuthUserFile "/home4/semfundc/.htpasswds/public_html/zidisha/passwd"
+# Force IE to NOT go into Compatability Mode
+<FilesMatch "\.(htm|html|shtml|php)$" >
+  Header set X-UA-Compatible "IE=Edge,chrome=1"
+</FilesMatch>
+
+# For security reasons, Options +FollowSymLinks cannot be overridden.
+Options +SymLinksIfOwnerMatch
+
+
 RewriteEngine On
-ErrorDocument 404 https://www.zidisha.org
-RewriteCond %{SERVER_PORT} !^443$
-RewriteRule ^(.*)$ https://www.zidisha.org/$1 [L,R] 
+
+# If SSL off, redirect to https
+RewriteCond %{HTTP_HOST} ^zidisha.org$
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://www.zidisha.org/$1 [R=301,L]
+# RewriteCond %{SERVER_PORT} !^443$
+# RewriteRule ^(.*)$ https://www.zidisha.org/$1 [L,R]
+
+
+# Redirect to Appropriate Language Version
 RewriteCond %{HTTP_HOST}%{REQUEST_URI} ^https://www.zidisha.org(\/?)$
 RewriteRule (.*) https://www.zidisha.org/en/$1 [R=302,L]
-RewriteRule ^(sq|ar|am|az|bn|bu|zh|dz|fr|de|el|hi|in|it|ja|kh|ko|la|ms|mn|np|ps|pr|pt|ru|es|tl|ta|th|tr|ur|vi)/(.*)$ $2?language=$1&%{QUERY_STRING} [L] 
+RewriteRule ^(sq|ar|am|az|bn|bu|zh|dz|fr|de|el|hi|in|it|ja|kh|ko|la|ms|mn|np|ps|pr|pt|ru|es|tl|ta|th|tr|ur|vi)/(.*)$ $2?language=$1&%{QUERY_STRING} [L]
 
+
+# Redirects for individual pages
 RewriteCond %{QUERY_STRING} (^|&)p=2(&|$)
 RewriteCond %{QUERY_STRING} !(^|&)nr=1($|&)
 RewriteCond %{QUERY_STRING} !(.*)p=2&(.*) 
@@ -100,25 +130,20 @@ RewriteCond %{QUERY_STRING} !(.*)p=69&(.*)
 RewriteRule ^ /microfinance/testimonials\.html? [R=301,L]
 RewriteRule microfinance/testimonials\.html(\/?)$ index.php?p=69&nr=1 [QSA]
 
-
 RewriteCond %{QUERY_STRING} (^|&)p=79(&|$)
 RewriteCond %{QUERY_STRING} !(^|&)nr=1($|&)
 RewriteCond %{QUERY_STRING} !(.*)p=79&(.*) 
 RewriteRule ^ /microfinance/microfinance\.html? [R=301,L]
 RewriteRule microfinance/microfinance\.html(\/?)$ index.php?p=79&nr=1 [QSA]
 
-
 RewriteRule microfinance/profile/(.*)$ index.php?p=12 [QSA]
 RewriteRule microfinance/loan/(.*)$ index.php?p=14 [QSA]
-
-
 RewriteRule microfinance/active-loans\.html(\/?)$ index.php?p=2&t=2&s=1&row=0&pg=1&key= [QSA]
+
 RewriteRule completed-loans\.html(\/?)$ index.php?p=2&t=3&s=1&row=0&pg=1&key= [QSA]
-# For security reasons, Option followsymlinks cannot be overridden.
-#Options +FollowSymLinks
-Options +SymLinksIfOwnerMatch
-RewriteEngine on
-RewriteRule index-p-(.*)-u-(.*)-l-(.*)\.htm$ index.php?p=$1&u=$2&l=$3					
-				
 RewriteRule completed-loans\.html(\/?)$ index.php?p=14&u=*&l=* [QSA]
+
 RewriteRule user-forum\.html(\/?)$ index.php?webtag=FORUM [QSA]
+
+# Shortcut for the weird URL parameters used
+RewriteRule index-p-(.*)-u-(.*)-l-(.*)\.htm$ index.php?p=$1&u=$2&l=$3
