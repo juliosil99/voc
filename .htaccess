@@ -37,18 +37,19 @@ Options +SymLinksIfOwnerMatch
 
 RewriteEngine On
 
-# If SSL off, redirect to https
-RewriteCond %{HTTP_HOST} ^zidisha.org$
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://www.zidisha.org/$1 [R=301,L]
-# RewriteCond %{SERVER_PORT} !^443$
-# RewriteRule ^(.*)$ https://www.zidisha.org/$1 [L,R]
+# Force SSL and WWW
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} !^www\.zidisha\.(org|dev) [NC]
+RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
+# Remove index.php
+RewriteCond %{THE_REQUEST} ^.*/index\.php 
+RewriteRule ^(.*)index.php$ /$1 [R=301,L] 
 
 # Redirect to Appropriate Language Version
-RewriteCond %{HTTP_HOST}%{REQUEST_URI} ^https://www.zidisha.org(\/?)$
-RewriteRule (.*) https://www.zidisha.org/en/$1 [R=302,L]
-RewriteRule ^(sq|ar|am|az|bn|bu|zh|dz|fr|de|el|hi|in|it|ja|kh|ko|la|ms|mn|np|ps|pr|pt|ru|es|tl|ta|th|tr|ur|vi)/(.*)$ $2?language=$1&%{QUERY_STRING} [L]
+# RewriteCond %{HTTP_HOST}%{REQUEST_URI} ^https://www.zidisha.org(\/?)$
+# RewriteRule (.*) https://www.zidisha.org/en/$1 [R=302,L]
+# RewriteRule ^(sq|ar|am|az|bn|bu|zh|dz|fr|de|el|hi|in|it|ja|kh|ko|la|ms|mn|np|ps|pr|pt|ru|es|tl|ta|th|tr|ur|vi)/(.*)$ $2?language=$1&%{QUERY_STRING} [L]
 
 
 # Redirects for individual pages
