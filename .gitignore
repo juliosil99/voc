@@ -1,5 +1,5 @@
-
 .DS_Store
+Thumbs.db
 
 # exclude .htaccess file used in dev environment
 /.htaccess
