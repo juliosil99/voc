@@ -136,6 +136,7 @@ RewriteCond %{QUERY_STRING} !(.*)p=79&(.*)
 RewriteRule ^ /microfinance/microfinance\.html? [R=301,L]
 RewriteRule microfinance/microfinance\.html(\/?)$ index.php?p=79&nr=1 [QSA]
 
+
 RewriteRule microfinance/profile/(.*)$ index.php?p=12 [QSA]
 RewriteRule microfinance/loan/(.*)$ index.php?p=14 [QSA]
 RewriteRule microfinance/active-loans\.html(\/?)$ index.php?p=2&t=2&s=1&row=0&pg=1&key= [QSA]
@@ -144,6 +145,7 @@ RewriteRule completed-loans\.html(\/?)$ index.php?p=2&t=3&s=1&row=0&pg=1&key= [Q
 RewriteRule completed-loans\.html(\/?)$ index.php?p=14&u=*&l=* [QSA]
 
 RewriteRule user-forum\.html(\/?)$ index.php?webtag=FORUM [QSA]
+
 
 # Shortcut for the weird URL parameters used
 RewriteRule index-p-(.*)-u-(.*)-l-(.*)\.htm$ index.php?p=$1&u=$2&l=$3
