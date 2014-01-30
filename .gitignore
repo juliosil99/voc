@@ -6,7 +6,10 @@
 /.htaccess
 *.htaccess
 
+# Global variables
 library/constant.php
+
+# Log files
 zidisha_contents/
 
 # =========================
