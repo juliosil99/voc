@@ -284,31 +284,8 @@ if($language==''){
 
 	<div class="container">
 			<div id="top-right">
-				<div id='top-links' style="float:right;">
-					
-<a href="microfinance/press.html"><?php echo $lang['menu']['zidisha_in_news'] ?></a> &nbsp;<span>|</span>&nbsp;
-
-<a href="http://p2p-microlending-blog.zidisha.org/" target="_blank"><?php echo $lang['menu']['blog'] ?></a> &nbsp;<span>|</span>&nbsp;
-
-<a href="http://www.amazon.com/Venture-Collection-Microfinance-Stories-ebook/dp/B009JC6V12" target="_blank"><?php echo $lang['menu']['ebook'] ?></a> &nbsp;<span>|</span>&nbsp;
-
-<a href="microfinance/microfinance.html"><?php echo $lang['menu']['abt_microfinance'] ?></a> &nbsp;<span>|</span>&nbsp;
-
-<a href="<?= SITE_URL ?>index.php?p=80">Lending Groups</a> &nbsp;<span>|</span>&nbsp;
-
-<!--
-					<a href="microfinance/gift-cards.html"><?php echo $lang['menu']['gift_cards'] ?></a> &nbsp;<span>|</span>&nbsp; 
--->
-					 
-<!-- 
-<a href="microfinance/newsletter.html"><?php echo $lang['menu']['newsletter'] ?></a> &nbsp;<span>|</span>&nbsp; 
--->
-					   
-					<!-- <a href="intern.html"><?php echo $lang['menu']['interns'] ?></a> &nbsp;<span>|</span>&nbsp;  -->
-
-<!-- <a href="microfinance/donate.html"><?php echo $lang['menu']['donate'] ?></a> &nbsp;<span>|</span>&nbsp; -->
-
-<a href="http://zidisha.org/forum/"><?php echo $lang['menu']['user_forum'] ?></a> &nbsp;<span>|</span>&nbsp; <a href="microfinance/contact.html"><?php echo $lang['menu']['contact_us'] ?></a> &nbsp;<span>|</span>&nbsp; <a href="javascript:void(0)" id="setLanguage"><?php echo $language1 ?></a> <a style="position:relative;top:-2px;left:-6px" href="javascript:void(0)" id="langPointer"><img border='0' style='cursor:pointer' src='images/layout/table_show/asc.gif' alt=''/></a>
+				<div id='top-links' style="float:right;">	
+					<a href="javascript:void(0)" id="setLanguage"><?php echo $language1 ?></a> <a style="position:relative;top:-2px;left:-6px" href="javascript:void(0)" id="langPointer"><img border='0' style='cursor:pointer' src='images/layout/table_show/asc.gif' alt=''/></a>
 				</div>
 				<div style="clear:both"></div>
 				<div id='languages' class="top-language" style="display:none">
@@ -326,38 +303,41 @@ if($language==''){
 				  <div style="clear:both"></div>
 	
 	<?php	if(empty($session->userid))
-			{	?>
+			{	
+				if(!isset($_SESSION['CodeByIp'])) {
+					$country = getCountryCodeByIP();
+		
+				}
+				if(isset($country['code']) && $country['code']!='') {
+					$_SESSION['CodeByIp'] = $country['code'];
+					if($country['code']=='SN' || $country['code']=='ID' || $country['code']=='BF' || $country['code']=='BJ' || $country['code']=='GN' || $country['code']=='HT' || $country['code']=='NE' || $country['code'] == 'FR' ) {
+						$joinlink ='index.php?p=1&sel=1';
+					}else{
+						$joinlink='index.php?p=1&sel=2';
+					}
+				}
+				?>
 				<!-- 31-10-2012 Anupam, Ebook link (requested to remove) -->
 				<!-- 				<div style='float:left;margin-top:20px;margin-left:200px;'><strong><a href="http://www.amazon.com/Venture-Collection-Microfinance-Stories-ebook/dp/B009JC6V12/ref=sr_1_13?s=digital-text&amp;ie=UTF8&amp;qid=1349104493&amp;sr=1-13&amp;keywords=microfinance" target="_blank"><?php echo $lang['loginform']['ebooklink']?></a></strong></div> -->
 				<div id="login" align="left">
-					<form method="post" action="process.php" class="login-form">
-						<div align="right">
-							<span class="login-label">Login</span>
-							<input class="login-field" type="text" name="username" id="username" value="<?php echo $lang['loginform']['username_login']?>" onfocus='loginfocus(this.value)' onblur='loginblur(this.value)'/>
-							
-							
-							<input class="login-field" type="text" id= "textfield" name="textpassword"  value="<?php echo $lang['loginform']['pwd_login']?>" onfocus="pwdFocus()"/><input class="login-field" id="pwdfield" style="display:none" type="password" name="password" value="" onblur="pwdBlur()" />
-
-							<input type="hidden" name="userlogin" />
-							<input type="hidden" name="user_guess" value="<?php echo generateToken('userlogin'); ?>"/>
-							<button type="submit" class="btn square">Go</button><br/>
-							<div><?php echo $form->error("username"); ?> <?php echo $form->error("password"); ?></div>
-						</div>
-						<p style="text-align:right">
-						<?php 	$Lendingcart = $database->getLendingCart(); 
-								if(!empty($Lendingcart)) {
+					<div align="right">
+						<span class="login-label">
+							<a href='<?php echo $joinlink; ?>'>Join</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+							<a href='index.php?p=116'>Login</a>
+						</span>
+					</div>
+						
+					<?php 	
+					$Lendingcart = $database->getLendingCart(); 
+					if(!empty($Lendingcart)) {
 						?>
-						<a href='index.php?p=75'><img src='images/layout/icons/cart.gif'> Lending Cart</a>
-						<?php } ?>
-						<input type="checkbox" id="remember" name="remember" /><label for="remember"><?php echo $lang['loginform']['rme'];?></label> &nbsp;|&nbsp; <a style="color:gray" href="index.php?p=56"><?php echo $lang['loginform']['fypassword'];?></a> &nbsp;|&nbsp; <?php echo $lang['loginform']['not_a_member'];?>&nbsp;&nbsp;<a style='color:#FF8B00;font-weight:bold;font-size:14px;' href="index.php?p=1&amp;sel=2"><?php echo $lang['loginform']['join_today'];?></a></p>
-					</form>
+						<p style="text-align:right">
+							<a href='index.php?p=75'><img src='images/layout/icons/cart.gif'> Lending Cart</a>
+						</p>
+					<?php } ?>
+					
 				</div>
-				<script type="text/javascript">
-				<!--
-					document.getElementById('pwdfield').setAttribute( "autocomplete", "off" );
-					document.getElementById('textfield').setAttribute( "autocomplete", "off" );
-				//-->
-				</script>
+				
 	<?php	}
 			else
 			{ 	?> 
