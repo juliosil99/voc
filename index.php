@@ -284,23 +284,7 @@ if($language==''){
 
 	<div class="container">
 			<div id="top-right">
-				<div id='top-links' style="float:right;">	
-					<a href="javascript:void(0)" id="setLanguage"><?php echo $language1 ?></a> <a style="position:relative;top:-2px;left:-6px" href="javascript:void(0)" id="langPointer"><img border='0' style='cursor:pointer' src='images/layout/table_show/asc.gif' alt=''/></a>
-				</div>
-				<div style="clear:both"></div>
-				<div id='languages' class="top-language" style="display:none">
-					<?php
-						$langs= $database->getActiveLanguages();
-						echo "<ul>";
-						echo "<li><a href='javascript:void(0)' onclick='javascript:setLanguage(\"en\");' style='color:gray'>English</a></li>";
-						foreach($langs as $row)
-						{
-							echo "<li><a href='javascript:void(0)' onclick='javascript:setLanguage(\"".$row['langcode']."\");' style='color:gray'>".$row['lang']."</a></li>";
-						}
-						echo "</ul>";
-					?>
-				  </div>
-				  <div style="clear:both"></div>
+				
 	
 	<?php	if(empty($session->userid))
 			{	
@@ -374,8 +358,7 @@ if($language==''){
 	<?php	}	?>
 			</div>
 
-			<div style="clear:both"></div>
-			<div id="logo"><h1><a href="./">Zidisha</a></h1></div>
+			<div id="logo"><h1><a href="./">Zidisha</a></h1><br/><br/><br/><br/></div>
 			<div>
 			<?php if(isset($_SESSION['Readonly'])) {
 						unset($_SESSION['Readonly']);
@@ -383,7 +366,7 @@ if($language==''){
 				}	?>
 			<?php if(isset($_SESSION['invalidForm'])) {
 						unset($_SESSION['invalidForm']);
-						echo "<div style='width:100%; background-color:red;color:white;text-align:center'>CSRF token invalid please try again</div>";
+						echo "";
 				}	?>
 			</div>
 
@@ -391,7 +374,6 @@ if($language==''){
 			<div id="nav">
 				<table class="nav-table">
 					<tr>
-						<td><a class="<?php if($page==0) echo 'current';?>" href="./"><?php echo $lang['menu']['home'] ?></a></td>
 						<td><a class="<?php if($page==2) echo 'current';?>" href="microfinance/lend.html"><?php echo $lang['menu']['Lend'] ?></a></td>
 						<td><a class="<?php if($page==47) echo 'current';?>" href="microfinance/borrow.html"><?php echo $lang['menu']['borrow'] ?></a></td>
 					<td><a class="<?php if($page==67) echo 'current';?>" href="microfinance/intern.html"><?php echo $lang['menu']['interns'] ?></a></td>
@@ -402,8 +384,7 @@ if($language==''){
 					</tr>
 				</table>
 			</div>
-
-		
+					
 <?php	if($page==0)
 		{
 			include_once("includes/home_flash.php");
@@ -907,11 +888,10 @@ if($language==''){
 		</div>
 		<!-- Example row of columns -->
 		<footer>
-			<a href="./"><?php echo $lang['menu']['home'] ?></a> &nbsp;|&nbsp;
-			<a href="index.php?p=5"><?php echo $lang['menu']['terms_use'] ?></a> &nbsp;|&nbsp;
-			
+
 <a href="microfinance/lend.html"><?php echo $lang['menu']['Lend'] ?></a> &nbsp;|&nbsp;
-			<a href="microfinance/borrow.html"><?php echo $lang['menu']['borrow'] ?></a>  &nbsp;|&nbsp;
+
+<a href="microfinance/borrow.html"><?php echo $lang['menu']['borrow'] ?></a>  &nbsp;|&nbsp;
 
 <a href="https://www.zidisha.org/microfinance/intern.html"><?php echo $lang['menu']['interns'] ?></a>  &nbsp;|&nbsp;
 
@@ -923,26 +903,33 @@ if($language==''){
 
 <a href="http://www.amazon.com/Venture-Collection-Microfinance-Stories-ebook/dp/B009JC6V12" target="_blank"><?php echo $lang['menu']['ebook'] ?></a> &nbsp;<span>|</span>&nbsp;
 
-<a href="https://www.zidisha.org/forum/"><?php echo $lang['menu']['user_forum'] ?></a> &nbsp;<span>|</span>&nbsp; 
+<a href="https://www.zidisha.org/forum/">Forum</a> &nbsp;<span>|</span>&nbsp; 
 
 <a href="microfinance/newsletter.html"><?php echo $lang['menu']['newsletter'] ?></a> &nbsp;<span>|</span>&nbsp;
 
-					<a href="microfinance/gift-cards.html"><?php echo $lang['menu']['gift_cards'] ?></a> &nbsp;<span>|</span>&nbsp; 
-					 
+<a href="microfinance/gift-cards.html"><?php echo $lang['menu']['gift_cards'] ?></a> &nbsp;<span>|</span>&nbsp; 					 
 
 <a href="microfinance/donate.html"><?php echo $lang['menu']['donate'] ?></a> &nbsp;<span>|</span>&nbsp; 
 
-<a href="microfinance/contact.html"><?php echo $lang['menu']['contact_us'] ?></a>
+<a href="index.php?p=5"><?php echo $lang['menu']['terms_use'] ?></a> &nbsp;|&nbsp;
 
+<a href="microfinance/contact.html"><?php echo $lang['menu']['contact_us'] ?></a> &nbsp;<span>|</span>&nbsp;
 
-<!--
-
-
-
-<a href="microfinance/microfinance.html"><?php echo $lang['menu']['abt_microfinance'] ?></a> &nbsp;<span>|</span>&nbsp;
-
--->
-
+<a href="javascript:void(0)" id="setLanguage"><?php echo $language1 ?></a> <a style="position:relative;top:-2px;left:-6px" href="javascript:void(0)" id="langPointer"><img border='0' style='cursor:pointer' src='images/layout/table_show/asc.gif' alt=''/></a>
+	<div style="clear:both"></div>
+	<div id='languages' class="top-language" style="display:none">
+		<?php
+			$langs= $database->getActiveLanguages();
+			echo "<ul>";
+			echo "<li><a href='javascript:void(0)' onclick='javascript:setLanguage(\"en\");' style='color:gray'>English</a></li>";
+			foreach($langs as $row)
+			{
+				echo "<li><a href='javascript:void(0)' onclick='javascript:setLanguage(\"".$row['langcode']."\");' style='color:gray'>".$row['lang']."</a></li>";
+			}
+			echo "</ul>";
+		?>
+	</div>
+				  
 
 			<p>
 				<em>
