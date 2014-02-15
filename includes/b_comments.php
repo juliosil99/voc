@@ -15,6 +15,7 @@ $(document).ready(function() {
 		$(this).text($(this).text() == "View More" ? "View Less" : "View More");
 		$(this).toggleClass("view-less"); 
 	});
+	
 });
 </script>
 <style>
@@ -43,37 +44,41 @@ $(document).ready(function() {
 		<h3 class="subhead" style="border-bottom:none;margin-bottom:0px"><?php echo"<a style='padding-right:20px' id='slick-toggle' href='$RequestUrl#'>".$lang['profile']['wcomments']."</a>";?><p id="user_comment" class="view-more-less">View Less</p></h3>
 	</div><br/>
 	<?php 
+
+	$vmcurrentloanid= $database->getCurrentLoanid($brw['mentor_id']);
+	$params['brwr_name']= $name;
+	$params['invitedby']= $invitedby;
+	$params['invited_tooltip']=$lang['profile']['tooltip_invited'];
+	$params['brwr_name']= $name;
+	$params['mentor']= $mentor;
+	$params['vm_tooltip']=$lang['profile']['tooltip_mentor'];
 			
-	if(!empty($invcurrentloanid)){?>
-		<div style="float:left;padding-bottom: 15px;">
-		<?php 
-			$params['brwr_name']= $name;
-			$params['invitedby']= $invitedby;
-			$params['invited_tooltip']=$lang['profile']['tooltip_invited'];
-			$vm_comments= $session->formMessage($lang['profile']['invited_text'], $params);
+	if(!empty($invcurrentloanid) && empty($vmcurrentloanid)){
 
-	} elseif(!empty($mentor_id)){?>
+		$vm_comments= $session->formMessage($lang['profile']['invited_text'], $params);
+
+	} elseif(!empty($vmcurrentloanid) && empty($invcurrentloanid)){
+
+
+	$params['vm_name']= $vm_name;
+	$params['vm_url']=$vm_url; 
+	$params['vm_tooltip']=$lang['profile']['tooltip_mentor'];
+		
+		$vm_comments= $session->formMessage($lang['profile']['vm_comment_text'], $params);
+
+	} elseif(!empty($mentor_id) && !empty($invcurrentloanid)){
+		
+		$vm_comments= $session->formMessage($lang['profile']['inv_vm_text'], $params);	
+	
+	} else {
+
+		$vm_comments = "";
+	}
+
+
+	?>
 	<div style="float:left;padding-bottom: 15px;">
-		<?php 
-			$params['brwr_name']= $name;
-			$params['vm_name']= $vm_name;
-			$params['vm_url']=$vm_url; 
-			$params['vm_tooltip']=$lang['profile']['tooltip_mentor'];
-
-//added by Julia 7-11-2013
-			$vm_level= $database->getUserLevelbyid($brw['mentor_id']);
-			$vmcurrentloanid= $database->getCurrentLoanid($brw['mentor_id']);
-			if($vm_level==BORROWER_LEVEL){
-
-				$vm_comments= $session->formMessage($lang['profile']['vm_comment_text'], $params);
-
-			} else {
-
-				$vm_comments= "";
-
-			}
-		}
-		echo $vm_comments; ?>
+		<?php echo $vm_comments; ?>
 	</div>
 	<div style="clear:both;border-top:1px solid #DFDCDC">&nbsp;</div>
 	<div>
@@ -219,28 +224,42 @@ $(document).ready(function() {
 										});
 									</script>
 					<?php			$senderid1=$commns['senderid'];
+									$imagesrc_comment=$database->getProfileImage($senderid1);
 									$receiverid=$commns['receiverid'];
 									$level =$database->getUserLevelbyid($senderid1);
-									if($level==BORROWER_LEVEL || $level==PARTNER_LEVEL)
+
+									if($level==BORROWER_LEVEL){
 										$name12=$database->getNameById($senderid1);
-									else { 
+										if (!empty($senderloanid)){
+											$sender_url= getLoanprofileUrl($senderid1,$senderloanid);
+										}else{
+											$sender_url='';
+										}
+									}else { 
+										$sender_url=getUserProfileUrl($senderid1);
+										$karma_score = number_format($database->getKarmaScore($senderid1));
+										$karma_tooltip = $lang['profile']['karma_tooltip'];						
 										$sublevel=$database->getUserSublevelById($senderid1);
-										if($sublevel==LENDER_GROUP_LEVEL)
+										if($sublevel==LENDER_GROUP_LEVEL){
 											$name12=$database->getNameById($senderid1);
-										else 
+										}else {
 											$name12=$database->getUserNameById($senderid1);
-										
+										}
 
 									}?>
 									<table class="zebra-striped">
 										<tbody>
 											<tr>
-												<td style="width:200px">
-													<img src="library/getimagenew.php?id=<?php echo $senderid1;?>&width=200&height=200">
-													<?php $prurl = getUserProfileUrl($senderid1);?>
-													<p style="margin-top:10px;text-align:center;"><?php echo "<a href='$prurl'>$name12</a>";?></p>
+												<td style="width:100px;border-top:1px solid #DFDCDC;border-bottom:1px solid #DFDCDC;border-left:1px solid #DFDCDC">
+													<img style="max-width:100px" src="<?php echo $imagesrc_comment; ?>">
+													<p style="margin-top:10px;text-align:center;"><?php if($level==LENDER_LEVEL){
+														echo "<a href='$sender_url'>$name12</a><br/><a style='cursor:pointer' class='tt'>($karma_score)<span class='tooltip'><span class='top'></span><span class='middle'>$karma_tooltip</span><span class='bottom'></span></span></a>";
+													} else {
+														echo "<a href='$sender_url'>$name12</a>";
+													} ?>
+													</p>
 												</td>
-												<td style="width:100%;border-right:1px solid #DFDCDC">
+												<td style="width:100%;border-top:1px solid #DFDCDC;border-right:1px solid #DFDCDC;border-bottom:1px solid #DFDCDC">
 													<strong><?php echo $name12;?></strong>&nbsp;<?php echo $lang['profile']['comments_on'] ?>&nbsp;<?php echo date("M d, Y", $commns['pub_date']);?><br/><br/>
 													<?php echo nl2br($msg1);?>
 													<br/>
@@ -265,9 +284,9 @@ $(document).ready(function() {
 																<input type='hidden' name='fb' value='<?php echo $fb;?>' />
 															</form>
 												<?php	}
-														echo "</div>";
+														echo "</div>"; //style width:106px
 													}
-													echo "</div>";
+													echo "</div>"; //line 254
 													if($msg1 != $msgorg1)
 													{
 														if(!empty($translate_user_name)){
@@ -280,7 +299,7 @@ $(document).ready(function() {
 														<?php echo nl2br($msgorg1);?>
 														<p>&nbsp;</p>
 													</div>
-												</td>
+												
 										<?php	if(isset($session->userid))
 												{	
 													if(!empty($commns['tr_message'])){
@@ -288,14 +307,16 @@ $(document).ready(function() {
 													}else{
 														$translate='Add translation';
 													}?>
-												<td style="width:110px;border-right:1px solid #DFDCDC">
-									<?php								
-	echo "<p><a id='slick-toggle".$incr."' href='$RequestUrl#c".($incr+1)."' style='color: #000000;text-decoration:underline'>Reply</a></p>";												
-	echo "<p><a style='text-decoration:underline' href='index.php?p=24&c_id=".$commns['id']."&ref=1'>$translate</a></p>";
-											
+												
+												<form action='./updatefeedback.php' method='POST'>
+												<?php								
+													echo "<br/><br/><p><a id='slick-toggle".$incr."' href='$RequestUrl#c".($incr+1)."' style='text-decoration:underline'>Reply</a>												
+													&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+													<a style='text-decoration:underline' href='index.php?p=24&c_id=".$commns['id']."&ref=1'>$translate</a>
+													&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";										
 
-if(isset($session->userid) && $session->userid!=$senderid1)
-														{
+												if(isset($session->userid) && $session->userid!=$senderid1)
+																										{
 															if($commns['publish']==1)
 															{
 																$pulishType="Feature on homepage";
@@ -304,7 +325,7 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 															{
 																$pulishType="Remove from homepage";
 															}	?>
-															<form action='./updatefeedback.php' method='POST'>
+															
 																<input type="submit" class="submitLink" value="<?php echo $pulishType;?>">
 																<input type='hidden' name='MessType' value='<?php echo $pulishType;?>'>
 																<input type='hidden' name='loanid' value='<?php echo $ld;?>'>
@@ -325,6 +346,7 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 														{
 															$deleteValue="DeleteReal";
 														}	?>
+														<a id='edit-toggle<?php echo $incr;?>' href="<?php echo $RequestUrl?>#c<?php echo ($incr+1);?>" style='text-decoration:underline'>Edit</a>
 														<form action='./updatefeedback.php' method='POST' name='delform<?php echo $incr;?>'>
 															<p><a href='javascript:void(0)' onclick='Deletearow<?php echo $incr;?>(<?php echo $incr;?>)' style='text-decoration:underline;'>Delete</a></p>
 															<input type='hidden' name='MessType' value='<?php echo $deleteValue; ?>'>
@@ -338,8 +360,8 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 															<input type='hidden' name='backComment' value='c<?php echo ($incr-1);?>' />
 															<input type='hidden' name='fb' value='<?php echo $fb;?>' />
 														</form>
-														<p><a id='edit-toggle<?php echo $incr;?>' href="<?php echo $RequestUrl?>#c<?php echo ($incr+1);?>" style='color: #000000;text-decoration:underline'>Edit</a></p>
-												<?php														}	?>
+														
+												<?php	}	?>
 												</td>
 										<?php	}	?>
 											</tr>
@@ -351,7 +373,8 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 											<form name="feedback" method="POST" action='./updatefeedback.php' enctype="multipart/form-data">
 												<div style="float:left;width:52%">
 													<p><strong><?php echo $lang['profile']['comment'];?></strong></p>
-													<div><textarea name="message"  style="width:95%;height:140px"></textarea></div>
+													<div><textarea name="message"  style="width:95%;height:140px"></textarea>
+													</div>
 												</div>
 												<div style="float:right;padding-top:30px;width:48%" align="right">
 													<p>Upload File1: <input type="file" name="file1[]" id="file11" /></p>
@@ -376,12 +399,13 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 												<div style="clear:both"></div>
 											</form>
 											<p>&nbsp;</p>
-										</div>
+										</div> <!-- slickbox -->
 										<div id="editbox<?php echo $incr;?>" style="border-bottom:1px solid #DFDCDC;display:none">
 											<form name="feedback" method="POST" action='./updatefeedback.php' enctype="multipart/form-data">
 												<div style="float:left;width:52%">
 													<p><strong><?php echo $lang['profile']['comment'];?></strong></p>
-													<div><textarea name="message" id='editmessage' style="width:95%;height:140px"><?php echo $msgorg1; ?></textarea></div>
+													<div><textarea name="message" id='editmessage' style="width:95%;height:140px"><?php echo $msgorg1; ?></textarea>
+													</div>
 												</div>
 												<div style="float:right;padding-top:30px;width:48%" align="right">
 													<p>Upload File1: <input type="file" name="file1[]" id="file11" /></p>
@@ -406,7 +430,7 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 												<div style="clear:both"></div>
 											</form>
 											<p>&nbsp;</p>
-										</div>
+										</div> <!-- editbox -->
 							<?php	}	?>
 								</div>
 						<?php	}
@@ -423,7 +447,7 @@ if(isset($session->userid) && $session->userid!=$senderid1)
 				{
 					echo"";
 				}	?>
-			</div>
-		</div>
-	</div>
-</div>
+			</div> <!-- /div on line 115 -->
+		</div> <!-- /user_comment_desc -->
+	</div> <!-- /div on line 78 -->
+</div> <!-- /maincontainer -->

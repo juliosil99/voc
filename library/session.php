@@ -65,8 +65,6 @@ class Session
 			
 		}
 
-		//$this->sendMixpanelUser();
-
 	}
 
 	function redirect($url)
@@ -600,11 +598,13 @@ function activateBorrower($borrowerid, $pcomment, $addmore, $cid, $ofclName = nu
 		$validation->checkAmount($amount, "paidamt");
 		$validation->checkDated($date, "paiddate");
 		$path=  getEditablePath('error.php');
-		include(FULL_PATH."editables/".$path);
 		$now = time();
-		if($now < strtotime($date)) {
+		$max_date = strtotime("+3 days",$now); //allow forward dating up to 3 days
+		$min_date = 1262304000; // 1 Jan 2010 to prevent erroneous entries before we were receiving payments
+		if(strtotime($date) > $max_date || strtotime($min_date) > strtotime($date)) { 
 			$form->setError('paiddate', $lang['error']['invalid_date']);
-		}
+		}		include(FULL_PATH."editables/".$path);
+
 
 		if($form->num_errors > 0)
 		{
@@ -722,7 +722,7 @@ function activateBorrower($borrowerid, $pcomment, $addmore, $cid, $ofclName = nu
 					require ("editables/mailtext.php");
 					$loanprurl = getLoanprofileUrl($borrowerid, $loanid);
 					$params['link'] = SITE_URL.$loanprurl.'#e1' ;
-					$params['bname'] = $b_name;
+					$params['bname'] = ucwords(strtolower($b_name));
 					$params['image_src'] = $database->getProfileImage($borrowerid);
 					$Subject = $this->formMessage($lang['mailtext']['RepayFeedback-subject'], $params);
 					$header = $this->formMessage($lang['mailtext']['RepayFeedback-msg1'], $params);
@@ -746,7 +746,7 @@ function activateBorrower($borrowerid, $pcomment, $addmore, $cid, $ofclName = nu
 			$telnumber= $database->getPrevMobile($borrowerid);
 			$to_number = $this->FormatNumber($telnumber, $country);
 			$bdetail=$database->getEmailB($borrowerid);
-			$params['bname']=$bdetail['name'];
+			$params['bname']=ucwords(strtolower($bdetail['name']));
 			$params['currency']= $currency;
 			$params['bpaidamt']= $amount;
 			$b_email=$bdetail['email'];
@@ -1092,7 +1092,8 @@ function activateBorrower($borrowerid, $pcomment, $addmore, $cid, $ofclName = nu
 				require ("editables/mailtext.php");
 				$From=EMAIL_FROM_ADDR;
 				$templet="editables/email/hero.html";
-				$params['bname'] = $database->getNameById($pid);
+				$bname_orig = $database->getNameById($pid);
+				$params['bname'] = ucwords(strtolower($bname_orig));
 				$params['ddate'] = date('M d, Y',  time());
 				$params['link'] = WEBSITE_ADDRESS.'?p=14&l='.$loanid ;
 				$Subject= $this->formMessage($lang['mailtext']['ActiveBid-subject'], $params);
@@ -1108,7 +1109,7 @@ function activateBorrower($borrowerid, $pcomment, $addmore, $cid, $ofclName = nu
 				}
 				$r = $database->getEmailB($pid);
 				$Subject=$lang['mailtext']['loan_disburse_sub'];
-				$To=$params['bname'] = $r['name'];
+				$To= $params['bname'] = ucwords(strtolower($r['name']));
 				$currency='';
 				$currency_amt=$database->getReg_CurrencyAmount($pid);
 				foreach($currency_amt as $row)
@@ -2353,7 +2354,7 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 						{
 							$params=array();
 							$params['applicant_name'] = $namea." ".$nameb;
-							$To=$params['bname'] = $userinfo['name'];
+							$To= $params['bname'] = ucwords(strtolower($userinfo['name']));
 							$params['amount'] = $referDetail['ref_commission'];
 							$params['referral_link'] = SITE_URL."index.php?p=50";
 							$Subject = $this->formMessage($lang['mailtext']['borrower_referral_sub'], $params);
@@ -2385,7 +2386,8 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 							$e_email= $endorser_email[$i];
 							$Subject=$namea." ".$nameb." ".$lang['mailtext']['borrowerEndorser-subject'];
 							$To=$params['name'] = $endorser_name[$i] ;
-							$params['bname']= $namea." ".$nameb;
+							$bname_orig = $namea." ".$nameb;
+							$params['bname'] = ucwords(strtolower($bname_orig));
 							$replyTo = SERVICE_EMAIL_ADDR;
 							$message = $this->formMessage($lang['mailtext']['BorrowerEndorser-msg'], $params);
 							$reply= $this->mailSendingHtml($From, $To, $e_email, $Subject, '', $message, 0, $templet, 3); 
@@ -2459,8 +2461,7 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 			$fb_data= '';
 			unset($_SESSION['FB_Error']);
 		}
-		
-		if($submit_type != $lang['register']['Registerlater']) {
+		if($submit_type == $lang['register']['RegisterComplete']) {
 //			Logger_Array("FB LOG - on session 3",'fb_data', serialize($fb_data).$uname);
 			$validation->validateBorrowerEdit($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $country, $email, $mobile,$reffered_by, $income, $about, $bizdesc, $photo, $bnationid, $community_name_no, $documents, $repaidPast, $debtFree, $share_update,$onbehalf, $behalf_name, $behalf_number, $behalf_email, $behalf_town, $submit_type, $uploadedDocs, $bfamilycont1,$bfamilycont2,$bfamilycont3, $bneighcont1, $bneighcont2, $bneighcont3,$home_no, $rec_form_offcr_name, $rec_form_offcr_num, $cntct_type, $fb_data, $endorser_name, $endorser_email,$id);
 		} else {
@@ -2556,7 +2557,8 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 								$e_email= $endorser_email[$i];
 								$Subject=$namea." ".$nameb." ".$lang['mailtext']['borrowerEndorser-subject'];
 								$To=$params['name'] = $endorser_name[$i] ;
-								$params['bname']= $namea." ".$nameb;
+								$bname_orig = $namea." ".$nameb;
+								$params['bname'] = ucwords(strtolower($bname_orig));
 								$replyTo = SERVICE_EMAIL_ADDR;
 								$message = $this->formMessage($lang['mailtext']['BorrowerEndorser-msg'], $params);
 								$reply= $this->mailSendingHtml($From, $To, $e_email, $Subject, '', $message, 0, $templet, 3); 
@@ -2614,7 +2616,8 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 								$e_email= $endorser_email[$i];
 								$Subject=$namea." ".$nameb." ".$lang['mailtext']['borrowerEndorser-subject'];
 								$To=$params['name'] = $endorser_name[$i] ;
-								$params['bname'] = $bdetail['FirstName']." ".$bdetail['LastName'];
+								$bname_orig = $bdetail['FirstName']." ".$bdetail['LastName'];
+								$params['bname'] = ucwords(strtolower($bname_orig));
 								$replyTo = SERVICE_EMAIL_ADDR;
 								$message = $this->formMessage($lang['mailtext']['BorrowerEndorser-msg'], $params);
 								$reply= $this->mailSendingHtml($From, $To, $e_email, $Subject, '', $message, 0, $templet, 3); 
@@ -3202,14 +3205,15 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 					$templet="editables/email/hero.html";
 					require ("editables/mailtext.php");
 					$To=$params['name'] = $deat['name'];
-					$params['bname'] = $database->getNameById($borrowerid);
+					$bname_orig = $database->getNameById($borrowerid);
+					$params['bname'] = ucwords(strtolower($bname_orig));
 					$loanprurl = getLoanprofileUrl($borrowerid, $loanid);
 					$params['profile_link'] = SITE_URL.$loanprurl;
 					$params['image_src'] = $database->getProfileImage($borrowerid);
 					$Subject = $this->formMessage($lang['mailtext']['AcceptBid-subject'], $params);
 					$header = $this->formMessage($lang['mailtext']['AcceptBid-msg1'], $params);
 					$message = $this->formMessage($lang['mailtext']['AcceptBid-msg2'], $params);
-					$reply=$this->mailSendingHtml($From, $To, $deat['email'], $Subject, $header, $message,0,$templet,3,$params);
+					$reply=$this->mailSendingHtml($From, $To, $deat['email'], $Subject, $header, $message,0,$templet,3, $params);
 				}
 				return 1;
 			}
@@ -3758,7 +3762,8 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 									$templet="editables/email/simplemail.html";
 									require("editables/mailtext.php");
 									$Subject=$lang['mailtext']['borrower_referral_admin_sub'];
-									$params['bname'] = $database->getNameById($commission['referrer_id']);
+									$bname_orig = $database->getNameById($commission['referrer_id']);
+									$params['bname'] = ucwords(strtolower($bname_orig));
 									$params['applicant_name'] = $database->getNameById($applicant_id);
 									$params['commission'] = $commission['ref_commission'];
 									$params['credit_amount'] = $balance;
@@ -3781,7 +3786,8 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 					$templet="editables/email/simplemail.html";
 					require("editables/mailtext.php");
 					$Subject=$lang['mailtext']['borrower_referral_admin_sub'];
-					$params['bname'] = $database->getNameById($commission['referrer_id']);
+					$bname_orig = $database->getNameById($commission['referrer_id']);
+					$params['bname'] = ucwords(strtolower($bname_orig));
 					$params['applicant_name'] = $database->getNameById($applicant_id);
 					$params['commission'] = $commission['ref_commission'];
 					$message = $this->formMessage($lang['mailtext']['borrower_referral_admin_body_1'], $params);
@@ -4186,8 +4192,6 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 			logger('lender registerd id '.$id);
 			$database->IsUserinvited($id, $email); // check if the registered user invited by any other existing user and save it in invitees table for future tracking.
 
-			//$this->sendMixpanelEvent('lender signup');
-
 		}
 			return $retVal;
 		}
@@ -4292,7 +4296,9 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 			$damount=$database->getOpenLoanAmount($brwid, $loanid, false);
 			$CurrencyRate = $database->getCurrentRate($brwid);
 			$BidAmt=$database->getTotalBid($brwid,$loanid);
-			if($availableAmt < $amount){
+			$amount=number_format((float)$amount, 2, '.', '');
+			$availableAmt=number_format((float)$availableAmt, 2, '.', '');
+			if($availableAmt < $amount || $amount == 0){
 				//$form->setError($field, $lang['error']['insuffi_amount']." USD ". number_format($availableAmt,2, '.', ','));
 				if($auto_lend) {
 					return 3;
@@ -4444,7 +4450,7 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 							$params['out_bid_amt'] = number_format($bidamount, 2, ".", ",");
 							$params['bid_amt'] = number_format($bidamount, 2, ".", ",");
 							$params['borrower_link'] = SITE_URL.$loanprurl;
-							$params['bname'] = $bname;
+							$params['bname'] = ucwords(strtolower($bname));
 							$params['bid_interest'] = number_format($bidint, 2, ".", ",");
 
 							$Subject=$lang['mailtext']['bid_out_sub'];
@@ -4461,7 +4467,7 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 							$params['remain_bid_amt'] = number_format($acceptedAmt, 2, ".", ",");
 							$params['bid_amt'] = number_format($bidamount, 2, ".", ",");
 							$params['borrower_link'] = SITE_URL.$loanprurl;
-							$params['bname'] = $bname;
+							$params['bname'] = ucwords(strtolower($bname));
 							$params['bid_interest'] = number_format($bidint, 2, ".", ",");
 							$params['out_bid_amt'] = number_format(($bidamount-$acceptedAmt), 2, ".", ",");
 							$Subject=$lang['mailtext']['bid_down_sub'];
@@ -5023,7 +5029,7 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 			}
 		}
 	}
-	function giftCardOrder($order_type, $order_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date)
+	function giftCardOrder($template, $order_type, $order_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date)
 	{
 		global $database, $session;
 		traceCalls(__METHOD__, __LINE__);
@@ -5034,14 +5040,14 @@ function register_b($uname, $namea, $nameb, $pass1, $pass2, $post, $city, $count
 		{
 			$total_cost += $order_cost[$i];
 		}
-		$res = $database->setGiftTransaction($userid,$order_type, $order_cost, $total_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date, $ip);
+		$res = $database->setGiftTransaction($userid,$template, $order_type, $order_cost, $total_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date, $ip);
 		if($res)
 		{
 			header("Location: index.php?p=27");
 		}
 		else
 		{
-			echo "There was some problem please try again <a href='microfinance/gift-cards.html'>click here</a>";
+			echo "There was an error processing this transaction. Please contact service@zidisha.org for assistance.";
 		}
 	}
 	function redeemCard($card_code, $id=0)
@@ -5498,7 +5504,7 @@ function forgiveReminder(){
 					$text=$text."<th>".$lang['loanstatn']['tot_paid_amount']."</th>";
 					if($displyall)
 					{
-						$text=$text."<th>".number_format(round_local($totalPaidAmt), 0, '.', ',')."</th>";
+						$text=$text."<th>".number_format($totalPaidAmt, 0, '.', ',')."</th>"; // round_local($totalPaidAmt)
 					}
 					else
 					{
@@ -5679,6 +5685,9 @@ function forgiveReminder(){
 		}
 		return 0;
 	}
+	
+/*  Commented By Mohit 03-02-2014 Autolending Bid code placed into AutoLendByUserId.php
+
 	function ProcessAutoBidding()
 	{	
 	global $database;
@@ -5767,13 +5776,13 @@ function forgiveReminder(){
 							}else {
 								$intToPlaceBid = $loans[0]['intOffer'];
 							}
-							/* Added By Mohit 20-01-14 To get Last manully Bid Detail*/
+							// Added By Mohit 20-01-14 To get Last manully Bid Detail
 							if($preference==6){										
-								$status = $session->getStatusBar($loan['borrowerid'],$loan['loanid'],5);
-								$lastBidDetail=$database->lastBidDetail();
-								if(!empty($lastBidDetail)){
-										$lastBidAmnt=$lastBidDetail['amnt'];
-										$lastBidIntr=$lastBidDetail['intr'];
+								$status = $session->getStatusBar($loans[0]['borrowerid'],$loans[0]['loanid'],5);
+								$lastBid=$database->lastBidDetail($loans[0]['loanid']);
+								if(!empty($lastBid)){
+										$lastBidAmnt=$lastBid['amnt'];
+										$lastBidIntr=$lastBid['intr'];
 
 										if($desiredInt < $lastBidIntr && $lastBidIntr<$MaxdesiredInt){
 											$intToPlaceBid=$lastBidIntr;
@@ -5788,7 +5797,7 @@ function forgiveReminder(){
 										$amountTobid = min($lastBidAmnt, $reqAmnt, AUTO_LEND_AMT);
 										
 								}
-							}/***** End here *****/
+							}  // End here
 							$LoanbidId=$this->placebid($loans[0]['loanid'], $loans[0]['borrowerid'], $amountTobid, $intToPlaceBid, 1, true,$lenderId);
 							if(is_array($LoanbidId)) {
 									$database->addAutoLoanBid($LoanbidId['loanbid_id'], $lenderId, $loans[0]['borrowerid'], $loans[0]['loanid'], $amountTobid,$intToPlaceBid);
@@ -5831,12 +5840,12 @@ function forgiveReminder(){
 										$intToPlaceBid = $loan['intOffer'];
 									}
 									
-									/* Added By Mohit 20-01-14 To get Last manully Bid Detail*/
+									// Added By Mohit 20-01-14 To get Last manully Bid Detail
 									if($preference==6){										
-										$lastBidDetail=$database->lastBidDetail();
+										$lastBid=$database->lastBidDetail($loan['loanid']);
 										if(!empty($lastBidDetail)){
-											    $lastBidAmnt=$lastBidDetail['amnt'];
-											    $lastBidIntr=$lastBidDetail['intr'];
+											    $lastBidAmnt=$lastBid['amnt'];
+											    $lastBidIntr=$lastBid['intr'];
 
 												if($desiredInt < $lastBidIntr && $lastBidIntr<$MaxdesiredInt){
 													$intToPlaceBid=$lastBidIntr;
@@ -5854,7 +5863,7 @@ function forgiveReminder(){
 											}
 									}else{
 										 $amntToLend=AUTO_LEND_AMT;
-									} /***** End here *****/		
+									} // End here	
 									
 									$LoanbidId=$this->placebid($loan['loanid'], $loan['borrowerid'], $amntToLend, $intToPlaceBid, 1, true,$lenderId);
 									if(is_array($LoanbidId)) {
@@ -5888,6 +5897,8 @@ function forgiveReminder(){
 		Logger_Array("AutoBid---LOG",'fully funded loan ID line 5940',$fullyFunded);
 		return $fullyFunded;
 	}
+*/
+	
 	function getLoansForBid($preference, $loansToAutolend, $processed) {
 
 		$sortedOn='random';
@@ -5998,7 +6009,6 @@ function forgiveReminder(){
 				}
 			}
 			
-			//$this->sendMixpanelEvent('lend');	
 		}
 		$GiftcardsinCart = $database->getGiftcardsFromCart($userid);
 		$availamount=$this->amountToUseForBid($userid);
@@ -6457,11 +6467,11 @@ function forgiveReminder(){
 	/* -------------------Mail section Start----------------------- */
 
 	
-	function mailSendingHtml($From, $To, $email, $Subject, $header, $message,$attachment,$templet,$html,$card_info)
+	function mailSendingHtml($From, $To, $email, $Subject, $header, $message,$attachment,$templet,$html,$tag,$card_info)
 	{
 		require_once ("includes/mailsender.php");
 		if($this->usersublevel !=READ_ONLY_LEVEL){
-			$r = mailSender($From, $To, $email, $Subject, $header, $message,$attachment,$templet,$html,$card_info);
+			$r = mailSender($From, $To, $email, $Subject, $header, $message,$attachment,$templet,$html,$tag,$card_info);
 		}
 		if(!empty($r))
 			return 1;
@@ -6475,7 +6485,7 @@ function forgiveReminder(){
 		}
 		return $msg;
 	}
-	public function sendBulkMails($emailadd, $selected_radio, $emailmssg, $emailsubject)
+	public function sendBulkMails($emailadd, $selected_radio, $emailmssg, $emailmssg2, $emailmssg3, $emailsubject, $emailheader, $image_src, $image_src2, $image_src3, $link, $link2, $link3, $anchor, $anchor2, $anchor3, $footer, $button_url, $button_text)
 	{
 		global $database, $form;
 		$path=  getEditablePath('error.php');
@@ -6495,7 +6505,30 @@ function forgiveReminder(){
 		if($form->num_errors > 0){
 			return 0;
 		}
-		$emailmssg=nl2br($emailmssg);
+
+		$emailmssg = nl2br($emailmssg);
+		$params['emailmssg2'] = nl2br($emailmssg2);
+		$params['emailmssg3'] = nl2br($emailmssg3);
+		$emailheader=nl2br($emailheader);
+		$params['image_src'] = $image_src;
+		$params['link'] = $link;
+		$params['anchor'] = $anchor;
+		$params['image_src2'] = $image_src2;
+		$params['link2'] = $link2;
+		$params['anchor2'] = $anchor2;
+		$params['image_src3'] = $image_src3;
+		$params['link3'] = $link3;
+		$params['anchor3'] = $anchor3;
+		$params['footer'] = $footer;
+		$params['button_url'] = $button_url;
+		$params['button_text'] = $button_text;
+
+		if(!empty($params['emailmssg2'])){
+			$tag = NEWS_TAG;
+		} else {
+			$tag = NEW_THIS_WEEK_TAG;
+		}
+		
 		if($selected_radio == 'Others')
 		{
 			$emailids=explode(",",$emailadd);
@@ -6504,10 +6537,10 @@ function forgiveReminder(){
 				require ("editables/mailtext.php");
 				$otheremail = $rows;
 				$From       = EMAIL_FROM_ADDR;
-				$templet    = "editables/email/simplemail.html";
+				$templet    = "editables/email/hero.html";
 				$Subject    = $emailsubjct;
 				$To         = $otheremail;
-				$reply      = $this->mailSendingHtml($From, $To, $otheremail, $emailsubject, '', $emailmssg, 0, $templet, 3);
+				$reply      = $this->mailSendingHtml($From, $To, $otheremail, $emailsubject, $emailheader, $emailmssg, 0, $templet, 3, $tag, $params);
 			}
 			return 1;
 		}
@@ -6532,10 +6565,10 @@ function forgiveReminder(){
 			require ("editables/mailtext.php");
 			$otheremail = $rows['Email'];
 			$From       = EMAIL_FROM_ADDR;
-			$templet    = "editables/email/simplemail.html";
+			$templet    = "editables/email/hero.html";
 			$Subject    = $emailsubjct;
 			$To         = $otheremail;
-			$reply      = $this->mailSendingHtml($From, $To, $otheremail, $emailsubject, '', $emailmssg, 0, $templet, 3);
+			$reply      = $this->mailSendingHtml($From, $To, $otheremail, $emailsubject, '', $emailmssg, 0, $templet, 3, NEWS_TAG, $params);
 		}
 		return 1;
 	}
@@ -6604,7 +6637,7 @@ function forgiveReminder(){
 
 			/*  0 for no attachment, 2 for HTML mail */
 
-			$reply=$this->mailSendingHtml($From, $To,$email_ids[$i], $emailsubject, '', $emailmssg,0,$templet,2,$promote_info);
+			$reply=$this->mailSendingHtml($From, $To,$email_ids[$i], $emailsubject, '', $emailmssg,0,$templet,2,INVITE_TO_JOIN_TAG,$promote_info);
 		}
 		return $reply;
 	}
@@ -6629,21 +6662,22 @@ function forgiveReminder(){
 		$params['name'] = $lender_name;
 		$params['user_msg']= $frnds_msg;
 		$Subject = $this->formMessage($lang['mailtext']['invite_subject'], $params);
+		$params['footer'] = "Click here to accept:";
+		$params['button_text'] = "Accept Invite";
 		if(!empty($email_subject) &&  !empty($invitemsg)) {
 			$Subject = trim($email_subject);
 			for($i=0; $i<count($email_ids); $i++) {
-				$params['zidisha_link'] = SITE_URL."index.php?refid=$ids[$i]";
-				$invite_link = $this->formMessage($lang['mailtext']['invite_link'], $params);
-				$invitemessg = $invitemsg."<br/><br/>".$invite_link;
+				$params['zidisha_link'] = $params['button_url'] = SITE_URL."index.php?refid=$ids[$i]";
+				$invitemessg = $invitemsg;
 				$message = $this->formMessage($invitemessg, $params);
-				$reply = $this->mailSendingHtml($From, $To, $email_ids[$i], $Subject, '', $message, 0, $templet, 3);
+				$reply = $this->mailSendingHtml($From, $To, $email_ids[$i], $Subject, '', $message, 0, $templet, 3, NEWS_TAG, $params);
 			}
 		}
 		else {
 			for($i=0; $i<count($email_ids); $i++) {
-				$params['zidisha_link']= SITE_URL."index.php?refid=$ids[$i]";
+				$params['zidisha_link']=  $params['button_url'] = SITE_URL."index.php?refid=$ids[$i]";
 				$message = $this->formMessage($lang['mailtext']['invite_body'], $params);
-				$reply=$this->mailSendingHtml($From, $To, $email_ids[$i], $Subject, '', $message, 0, $templet, 3);
+				$reply=$this->mailSendingHtml($From, $To, $email_ids[$i], $Subject, '', $message, 0, $templet, 3, NEWS_TAG, $params);
 			}
 		}
 		return $reply;
@@ -6670,7 +6704,7 @@ function forgiveReminder(){
 				if($row['sender'] != $rec_email && $rec_email != "")
 				{	
 					$emailmssg .= $lang['mailtext']['gift_order_msg_footer'];
-					$reply=$this->mailSendingHtml($From, $To, $rec_email, $emailsubject, '', $emailmssg, 0, $templet, 3);
+					$reply=$this->mailSendingHtml($From, $To, $rec_email, $emailsubject, '', $emailmssg, 0, $templet, 3, NEWS_TAG);
 					$emailmssg = $lang['mailtext']['gift_order_msg_header'];
 					
 				}
@@ -6699,7 +6733,7 @@ function forgiveReminder(){
 			}
 			/* in following last two lines sending mail to last sender  */
 			$emailmssg .= $lang['mailtext']['gift_order_msg_footer'];
-			$reply=$this->mailSendingHtml($From, $To, $rec_email, $emailsubject, '', $emailmssg, 0, $templet, 3);
+			$reply=$this->mailSendingHtml($From, $To, $rec_email, $emailsubject, '', $emailmssg, 0, $templet, 3, NEWS_TAG);
 			if($reply)
 				Logger_Array("Gift Card order mail sent to sender ",'email, To', $rec_email, $To);
 		} else {
@@ -6726,23 +6760,30 @@ function forgiveReminder(){
 				}
 				if($flag)
 				{
-					$card_info = array();
-					$card_info['card_amount'] = number_format($row['card_amount']);
-					$card_info['to_name'] = $row['to_name'];
-					$card_info['from_name'] = $row['from_name'];
-					$card_info['message'] = $row['message'];
-					$card_info['card_code'] = $row['card_code'];
-					$card_info['exp_date'] = date ( 'F j, Y', $row['exp_date']);
-					$card_info['card_link'] = SITE_URL."cardimage.php?id_no=".$row['txn_id']."&card_code=".$row['card_code'];
+					$template = $row['template'];
+					if ($template > 1){
+						$params['image_src'] = SITE_URL."images/gift_card/image".$template.".png";
+					}else{
+						$params['image_src'] = "images/gift_card/combined_img.png";
+					}
 					$From = EMAIL_FROM_ADDR;
-					$emailsubject = $lang['mailtext']['gift_card_subject'];
-					$templet="editables/email/giftmail.html";
-					$To = "";
-					$params['link_1'] = SITE_URL."index.php?p=1&sel=2";
-					$params['link_2'] = SITE_URL."index.php?p=17";
+					$templet="editables/email/hero.html";
+					$params['to_name'] = $row['to_name'].",";
+					$params['from_name'] = $row['from_name'];
+					$params['message'] = $row['message'];
+					$params['card_code'] = $row['card_code'];
+					$params['card_amount'] = number_format($row['card_amount']);
+					$params['link'] = SITE_URL."microfinance/lend.html";
+					if(!empty($row['from_name']))
+					{
+						$header = $this->formMessage($lang['mailtext']['gift_card_header'], $params);
+						$emailsubject = $this->formMessage($lang['mailtext']['gift_card_subject'], $params);
+					}else{
+						$header = $lang['mailtext']['gift_card_anonymous_header'];
+						$emailsubject = $lang['mailtext']['gift_card_anonymous_subject'];
+					}
 					$emailmssg = $this->formMessage($lang['mailtext']['gift_card_msg_body'], $params);
-																								/*  0 for no attachment, 1 for HTML mail */
-					$reply=$this->mailSendingHtml($From, $To, $row['recipient_email'], $emailsubject, '', $emailmssg,0,$templet,1,$card_info);
+					$reply=$this->mailSendingHtml($From, '', $row['recipient_email'], $emailsubject, $header, $emailmssg,0,$templet,3,NEWS_TAG, $params);
 					if($reply)
 						Logger_Array("Gift Card mail sent",'email, To', $row['recipient_email'], $To);
 				}
@@ -6822,7 +6863,7 @@ function forgiveReminder(){
 		$templet="editables/email/simplemail.html";
 		require("editables/mailtext.php");
 		$Subject=$lang['mailtext']['borrower_mobile_change_sub'];
-		$To=$params['bname'] = $Detail['name'];
+		$To= $params['bname'] = $Detail['name'];
 		$params['username'] = $this->username;
 		$CountryDetail=$database->getUserCityCountry($userid);
 		$params['country'] =$database->mysetCountry($CountryDetail['Country']);
@@ -6868,20 +6909,30 @@ function forgiveReminder(){
 		 }
 
 		//MESSAGE TO ADMIN
+		$templet="editables/email/hero.html";
 		$To=ADMIN_FROM_NAME;
 		$adminemail=ADMIN_EMAIL_ADDR;
-		$params['name'] = 'Admin';
 		$params['link'] = SITE_URL.$loanprurl ;
 		$params['message'] = $msg;
 		$params['images'] =  $imgtag;
-		$params['date'] =  date("M d, Y ",$cmts['pub_date']);
 		$params['mname'] = $database->getUserNameById($cmts['senderid']);
 		$ulevel=$database->getUserLevel($params['mname']);
 		if($ulevel==BORROWER_LEVEL)
-			$params['mname']=$database->getNameById($cmts['senderid']);
+			$borrower_name = $database->getNameById($cmts['senderid']);
+			$params['mname']=ucwords(strtolower($borrower_name));
+		$user_citycountry=$database->getUserCityCountry($cmts['senderid']);
+		$u_city=$user_citycountry['City'];
+		$u_country=$user_citycountry['Country'];
+		$u_country=$database->mysetCountry($u_country);
+		if (!empty ($u_city)){
+			$params['location'] = $u_city.", ".$u_country;
+		} else {
+			$params['location'] = $u_country;
+		} 
+		
 		$emailmssg=$this->formMessage($lang['mailtext']['comment-msg'], $params);
 
-		$reply=$this->mailSendingHtml($From,$To,$adminemail , $emailsubject, '', $emailmssg, 0, $templet, 3);
+		$reply=$this->mailSendingHtml($From,$To,$adminemail , $emailsubject, '', $emailmssg, 0, $templet, 3, COMMENT_NOTIFICATIONS_TAG);
 
 		//MESSAGE TO BORROWER
 		if($b_email!='' && $cmts['senderid']!=$userid)
@@ -6905,11 +6956,10 @@ function forgiveReminder(){
 
 				$templet="editables/email/hero.html";
 				$lenderemail=$rows['Email'];
-				$params['name'] = $To;
 				$params['link'] = SITE_URL.$loanprurl ;
 				$emailmssg=$this->formMessage($lang['mailtext']['comment-msg'], $params);
 				if($lenderemail){
-					$reply=$this->mailSendingHtml($From,'',$lenderemail , $emailsubject, '', $emailmssg, 0, $templet, 3);
+					$reply=$this->mailSendingHtml($From,'',$lenderemail , $emailsubject, '', $emailmssg, 0, $templet, 3, COMMENT_NOTIFICATIONS_TAG);
 				}
 			}
 		}
@@ -6935,7 +6985,8 @@ function forgiveReminder(){
 
 			$To=ADMIN_FROM_NAME;
 			$adminemail=ADMIN_EMAIL_ADDR;
-			$params['bname'] = $res_BEmail['name'];
+			$bname_orig = $res_BEmail['name'];
+			$params['bname'] = ucwords(strtolower($bname_orig));
 			$params['lname'] = 'Admin';
 			$loanprurl = getLoanprofileUrl($userid, $loanid);
 			$params['link'] = SITE_URL.$loanprurl ;
@@ -6947,14 +6998,14 @@ function forgiveReminder(){
 				$params['sender']=$database->getNameById($cmts['senderid']);
 			$emailsubject=  $this->formMessage($lang['mailtext']['translate_comment_lender_sub'], $params);
 			$emailmssg=$this->formMessage($lang['mailtext']['translate_comment_lender_body'], $params);
-			$reply=$this->mailSendingHtml($From,$To,$adminemail , $emailsubject, '', $emailmssg, 0, $templet, 3);
+			$reply=$this->mailSendingHtml($From,$To,$adminemail , $emailsubject, '', $emailmssg, 0, $templet, 3, COMMENT_NOTIFICATIONS_TAG);
 
 			//MESSAGE TO PARTNER
 			if(!empty($p_detail['email']) && $p_detail['postcomment'] == 1)
 			{
 				$params['lname'] = $To= $p_detail['name'];
 				$emailmssg=$this->formMessage($lang['mailtext']['translate_comment_lender_body'], $params);
-				$reply=$this->mailSendingHtml($From,$To,$p_detail['email'] , $emailsubject, '', $emailmssg, 0, $templet, 3);
+				$reply=$this->mailSendingHtml($From,$To,$p_detail['email'] , $emailsubject, '', $emailmssg, 0, $templet, 3, COMMENT_NOTIFICATIONS_TAG);
 			}
 
 			//MESSAGE TO LENDER
@@ -6963,7 +7014,7 @@ function forgiveReminder(){
 				$params['lname']= $To =$rows['FirstName'] .' ' . $rows['LastName'];
 				$emailmssg=$this->formMessage($lang['mailtext']['translate_comment_lender_body'], $params);
 				if($lenderemail)
-					$reply=$this->mailSendingHtml($From,$To,$rows['Email'] , $emailsubject, '', $emailmssg, 0, $templet, 3);
+					$reply=$this->mailSendingHtml($From,$To,$rows['Email'] , $emailsubject, '', $emailmssg, 0, $templet, 3, COMMENT_NOTIFICATIONS_TAG);
 			}
 		}
 	}
@@ -6975,7 +7026,8 @@ function forgiveReminder(){
 		$templet="editables/email/hero.html";
 		require("editables/mailtext.php");
 		$Subject=$lang['mailtext']['forgive_lender_sub'];
-		$params['bname'] = $database->getNameById($borrower_id);
+		$bname_orig = $database->getNameById($borrower_id);
+		$params['bname'] = ucwords(strtolower($bname_orig));
 		$loanprurl = getLoanprofileUrl($borrower_id, $loan_id);
 		$params['borrower_link'] = SITE_URL.$loanprurl;
 		$params['amount'] = number_format($damount, 2, ".", "");
@@ -7009,7 +7061,8 @@ function forgiveReminder(){
 		require("editables/mailtext.php");
 		$Detail=$database->getEmail($lenderid);
 		$Subject=$lang['mailtext']['default_loan_lender_sub'];
-		$params['bname'] = $borrower_name;
+		$bname_orig = $borrower_name;
+		$params['bname'] = ucwords(strtolower($bname_orig));
 		$params['percent_repaid'] = $percent_repaid;
 		$params['rqst_amt'] = number_format($rqst_amt, 0, '.', '');
 		$message = $this->formMessage($lang['mailtext']['default_loan_lender_body'], $params);
@@ -7023,7 +7076,8 @@ function forgiveReminder(){
 		$From=EMAIL_FROM_ADDR;
 		$templet="editables/email/hero.html";
 		require("editables/mailtext.php");
-		$params['bname'] = $borrower_name;
+		$bname_orig = $borrower_name;
+		$params['bname'] = ucwords(strtolower($bname_orig));
 		$params['repay_date'] = date('F j, Y',$repay_date);
 		$loanprurl = getLoanprofileUrl($borrower_id, $loan_id);
 		$params['link'] = SITE_URL.$loanprurl;
@@ -7041,7 +7095,8 @@ function forgiveReminder(){
 		require ("editables/mailtext.php");
 		$loanprurl = getLoanprofileUrl($borrowerid, $loanid);
 		$params['link'] = SITE_URL.$loanprurl.'#e1' ;
-		$params['bname'] = $b_name;
+		$bname_orig = $b_name;
+		$params['bname'] = ucwords(strtolower($bname_orig));
 		$params['image_src'] = $database->getProfileImage($borrowerid);
 		$Subject = $this->formMessage($lang['mailtext']['RepayFeedback-subject'], $params);
 		$header = $this->formMessage($lang['mailtext']['RepayFeedback-msg1'], $params);
@@ -7086,7 +7141,7 @@ function forgiveReminder(){
 		$Subject=$lang['mailtext']['BorrowerReg-subject'];
 		$To=$params['name'] = $name;
 		$message = $this->formMessage($lang['mailtext']['BorrowerReg-msg'], $params);
-		$this->mailSendingHtml($From, $To, $email, $Subject, '', $message, 0, $templet, 3);
+		$this->mailSendingHtml($From, $To, $email, $Subject, '', $message, 0, $templet, 3, NEWS_TAG);
 		$this->sendContactConfirmation($userid);
 	}
 	public function sendWelcomeMailToLender($email)
@@ -7121,10 +7176,10 @@ function forgiveReminder(){
 			foreach($email_ids as $email_id) {
 				$reply_to=$Detail['email'];
 				$Frm='"'. $Detail['name'] .'" <'. $Detail['email'] .'>';
-				$reply=$this->mailSendingHtml($Frm, $To, $email_id, $email_sub, '', $message, 0, $templet, 3);
+				$reply=$this->mailSendingHtml($Frm, $To, $email_id, $email_sub, '', $message, 0, $templet, 3, NEWS_TAG);
 				}
 			if($sendme) {
-				$reply=$this->mailSendingHtml($From, $To, $Detail['email'], $email_sub, '', $message, 0, $templet, 3);
+				$reply=$this->mailSendingHtml($From, $To, $Detail['email'], $email_sub, '', $message, 0, $templet, 3, NEWS_TAG);
 			}
 		}
 	}
@@ -7143,7 +7198,7 @@ function forgiveReminder(){
 			$bemail=$Detail['email'];
 			$To = "";
 			$params['expirydate']=date('F d, Y',  $expirydate);
-			$params['bname'] = $Detail['name'];
+			$params['bname'] = ucwords(strtolower($Detail['name']));
 			$loanprurl = getLoanprofileUrl($brwid, $loanid);
 			$params['link']= SITE_URL.$loanprurl;
 			$message = $this->formMessage($lang['mailtext']['LoanFunded-body'], $params);
@@ -7169,7 +7224,7 @@ function forgiveReminder(){
 			$bemail=$Detail['email'];
 			$To = "";
 			$params['deadline']=$database->getAdminSetting('deadline');
-			$params['bname'] = $Detail['name'];
+			$params['bname'] = ucwords(strtolower($Detail['name']));
 			$params['editlink']= SITE_URL.'index.php?p=44';
 			$params['loanappliclink']= SITE_URL.'index.php?p=44';
 			$loanprurl = getLoanprofileUrl($brwid, $loanid);
@@ -7209,7 +7264,7 @@ function forgiveReminder(){
 			$params['expirydate']=date('F d, Y',  $expirydate);
 			$params['editlink']=SITE_URL.'index.php?p=13';
 			$params['loanappliclink']= SITE_URL.'index.php?p=44';
-			$params['bname'] = $Detail['name'];
+			$params['bname'] = ucwords(strtolower($Detail['name']));
 			$message = $this->formMessage($lang['mailtext']['LoanExpiry-body'], $params);
 			$reply=$this->mailSendingHtml($From, $To, $bemail, $Subject, '', $message, 0, $templet, 3);
 			$database->setExpirymailSent($loanToexpire['loanid']);
@@ -7231,7 +7286,8 @@ function forgiveReminder(){
 			$To = "";
 			$params['expirydate']=date('F d, Y',  $expirydate);
 			$params['loanapplicLink']=SITE_URL.'index.php?p=9&inst=1';
-			$params['bname'] = $Detail['name'];
+			$bname_orig = $Detail['name'];
+			$params['bname'] = ucwords(strtolower($bname_orig));
 			$message = $this->formMessage($lang['mailtext']['LoanExpired-body'], $params);
 			$reply=$this->mailSendingHtml($From, $To, $bemail, $Subject, '', $message, 0, $templet, 3);
 	}
@@ -7341,7 +7397,7 @@ function forgiveReminder(){
 		$invite_link = $this->formMessage($lang['mailtext']['binvite_link'], $params);
 		$invite_message = $invite_message."<br/><br/>".$invite_link;
 		$message = $this->formMessage($invite_message, $params);
-		$reply = $this->mailSendingHtml($From, $To, $frnd_email, $Subject, '', $message, 0, $templet, 3);
+		$reply = $this->mailSendingHtml($From, $To, $frnd_email, $Subject, '', $message, 0, $templet, 3, NEWS_TAG);
 		return $reply;
 	}
 	function resendEndorsermail($id){
@@ -7883,17 +7939,17 @@ function forgiveReminder(){
 			$to_number = substr($result, -8);
 			$to_number=str_pad($to_number, 12, '+224', STR_PAD_LEFT);
 		}
-		if($country=='ML'){
-			$to_number = substr($result, -9);
-			$to_number=str_pad($to_number, 13, '+223', STR_PAD_LEFT);
-		}
 		if($country=='BJ'){
 			$to_number = substr($result, -8);
 			$to_number=str_pad($to_number, 12, '+229', STR_PAD_LEFT);
 		}
 		if($country=='GH'){
-			$to_number = substr($result, -9);
-			$to_number=str_pad($to_number, 13, '+233', STR_PAD_LEFT);
+			$to_number = substr($result, -10);
+			$to_number=str_pad($to_number, 14, '+233', STR_PAD_LEFT);
+		}
+		if($country=='ZM'){
+			$to_number = substr($result, -10);
+			$to_number=str_pad($to_number, 14, '+260', STR_PAD_LEFT);
 		}
 		return $to_number;
 	}
@@ -7942,6 +7998,10 @@ function forgiveReminder(){
 		if(!empty($bdetail['rec_form_offcr_name']) && !empty($telnumber))
 
 			$this->ContactConfirmation($bdetail['rec_form_offcr_name']." ".$bdetail['rec_form_offcr_num'], $country, $telnumber, $language, $userid);
+		
+		if(!empty($bdetail['mentor_id']) && !empty($telnumber))
+
+			$this->VMConfirmation($bdetail['mentor_id'], $userid);
 
 	}
 
@@ -8192,16 +8252,34 @@ function forgiveReminder(){
 				} else {
 //case where last loan was repaid on time, overall repayment rate is above threshold and loan held for long enough to qualify for credit limit increase
 
-					if($addCreditearned==false){
+					$lastinst_amt = $database->getLastInstallmentAmt($userid, $loanid);
+					if ($lastinst_amt>($currentloanamt * 0.1) && convertToDollar($lastinst_amt,$rate) > 100) { //case where more than 30% and $100 of last loan was paid in the last installment
+
+						if(!$addCreditearned){
+
+							$currentlimit=ceil($currentloanamt);
+
+						}else{						
+			
+							$currentlimit=ceil($currentloanamt+$invitecredit);
+
+						}
+
+					}else {
+
+						if($addCreditearned==false){
+							
+							$currentlimit= ceil(($currentloanamt * $percentincrease) / 100);
+							if($loanstatus == LOAN_OPEN){ 			
+									$currentlimit=$currentloanamt;	// added by mohit to fix credit limit on edit loan page							
+							}
+											
+						}else{
+
+							$currentlimit= ceil(($currentloanamt * $percentincrease) / 100) + $invitecredit;
 						
-						$currentlimit= ceil(($currentloanamt * $percentincrease) / 100);
-										
-					}else{
-
-
-						$currentlimit= ceil(($currentloanamt * $percentincrease) / 100) + $invitecredit;
-					
-					}				
+						}	
+					}			
 			
 				}
 			}			
@@ -8531,59 +8609,60 @@ function languageSetting($lang_code,$country_code){
 }
 
 
-function sendMixpanelUser(){
-
-	require_once 'extlibs/mixpanel-php-master/lib/Mixpanel.php';
-
-	// get the Mixpanel class instance, replace with your project token
-	$mp = Mixpanel::getInstance(MIXPANEL_PROJECT_TOKEN);
-
-	$userid = $this->userid;
-
-	if ($this->userlevel == 1){
-		$userlevel = "Borrower";
-	}elseif ($this->userlevel == 4){
-		$userlevel = "Lender";
-	}elseif ($this->userlevel == 9){
-		$userlevel = "Admin";
-	}else {
-		$userlevel = $this->userlevel;
-	}
-			
-	$mp->people->set($userid, array(
-    	'$first_name' => $this->fullname,
-    	'userlevel' => $userlevel
-	));
-		
-
-}
-
-
-function sendMixpanelEvent($event_label){
-
-	require_once 'extlibs/mixpanel-php-master/lib/Mixpanel.php';
-
-	// get the Mixpanel class instance, replace with your project token
-	$mp = Mixpanel::getInstance(MIXPANEL_PROJECT_TOKEN);
-
-	if($event_label=='lender signup') {
-
-		$userid = $this->userid;
-
-		$mp->createAlias($userid, array(
-	    '$first_name' => "Guest",
-	    'userlevel' => GUEST_LEVEL
-		));
+function VMConfirmation($mentorid, $userid)
+	{
+		global $database;
+		$From=EMAIL_FROM_ADDR;
+		$templet="editables/email/simplemail.html";
+		require ("editables/mailtext.php");
+		$mentor_email=$database->getEmailB($mentorid);
+		$params['uname']=$mentor_email['name'];
+		$res_BEmail=$database->getEmailB($userid);
+		$params['bname']=$res_BEmail['name'];
+		$profile = getUserProfileUrl($userid);
+		$params['link']= "https://www.zidisha.org/".$profile;
+		$emailsubject= $this->formMessage($lang['mailtext']['vm_confirmation_subject'], $params);
+		$emailmssg=$this->formMessage($lang['mailtext']['vm_confirmation'], $params);
+		$reply=$this->mailSendingHtml($From,'',$mentor_email , $emailsubject, '', $emailmssg, 0, $templet, 3);		
 	}
 
-	// track an event
-	$mp->track($event_label); // track an event
 
-}
+function repayRateDisplay($userid)
+	{
+		global $database;
+		$RepayRate=$this->RepaymentRate($userid);
+		$totalTodayinstallment=$database->getTotalInstalAllLoans($userid);
+		if(!empty($totalTodayinstallment) && $totalTodayinstallment != 0){ 
+			$repayrate_disp = number_format($RepayRate)."% (".number_format($totalTodayinstallment).")";
+		}else{
+			$repayrate_disp = "(New Member)";
+		}
+		return $repayrate_disp;
+	}
 
-/***** end here ******/
+
+//sends confirmation email to the member who invited a new lender
+function sendLenderInviteConf($inviteeid){
+		global $database;
+		$From=EMAIL_FROM_ADDR;
+		require ("editables/mailtext.php");
+		$templet="editables/email/hero.html";
+		$invitor_id = $database->getInvitee($inviteeid);
+		$invitor_details = $database->getEmail($invitor_id);
+		$invitor_email= "julia@zidisha.org";
+		$invitee_details = $database->getEmail($inviteeid);
+		$params['imail']="inviteemail";
+		$emailsubject= $this->formMessage($lang['mailtext']['lender_invite_conf_subject'], $params);
+		$emailmssg=$this->formMessage($lang['mailtext']['lender_invite_conf'], $params);
+		$params['footer'] = "Thought of someone else to invite?";
+		$params['button_text'] = "Send Invite";
+		$params['button_url'] = "https://www.zidisha.org/index.php?p=30";
+		$reply=$this->mailSendingHtml($From,'',$invitor_email , $emailsubject, '', $emailmssg, 0, $templet, 3, ACCOUNT_NOTIFICATIONS_TAG, $params);		
+	}
 
 
+
+//end
 }
 $session=new Session;
 $form = new Form;

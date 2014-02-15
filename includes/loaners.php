@@ -222,8 +222,8 @@ if(!empty($openloans))
         {
                 $userid=$row['userid'];
                 $is_volunteer= $database->isBorrowerAlreadyAccess($userid);
-                $bfrstloan=$database->getBorrowerFirstLoan($userid);
-                $RepayRate=$session->RepaymentRate($userid);
+                $bfrstloan=$database->getBorrowerFirstLoan($userid); 
+                $repayrate_disp = $session->repayRateDisplay($userid);
                 
 
 //added by Julia 15-10-2013
@@ -277,45 +277,31 @@ if(!empty($openloans))
                         $statusMsg=$lang['loaners']['status'];
                 $loanprurl = getLoanprofileUrl($userid,$loanid);
                 $prurl = getUserProfileUrl($userid);
+                $repayrate_tooltip = $lang['loanstatn']['tooltip_RepayRate'];
         ?>
                 <div class="browse-listing">
                         <a href="<?php echo $loanprurl?>"><img src="<?php echo $photo?>" alt="<?php echo $name?>" /></a>
                         <div class="listing-info">
-                                <h4><?php echo $name?></h4>
-                                <p><?php if($is_volunteer){?><img class='starimg' src="images/star.png" ></img>&nbsp;&nbsp;&nbsp;Volunteer Mentor<br/><?php } 
+                            <?php if(!empty ($summary) && (strlen($summary) < 70)){ ?>
 
-//modified by Julia to add number of months repayments were due 15-10-2013
+                                <h4><?php echo $summary; ?></h4>
+                                <p> 
+                            <?php }
 
-                if($bfrstloan){ echo  $lang['loaners']['repayrate']?>: <?php echo number_format($RepayRate); ?>% (<?php echo number_format($totalTodayinstallment)?>)
+                                echo  $name." ".$repayrate_disp;   
 
-<?php }
 
-/* removed by Julia 15-10-2013
+                                if($is_volunteer){?>
 
-                if($bfrstloan){ if($f!=''){echo number_format($f); ?>% Positive Feedback&nbsp;(<a href="<?php echo $prurl?>?fdb=2"><?php echo $cf-1; ?></a>)<?php } }
-
-*/
-
-                else        echo 'New Member'; ?> 
+                                <img class='starimg' src="images/star.png" ></img>&nbsp;&nbsp;&nbsp;Volunteer Mentor<br/><?php } 
+                                    
+                                    ?>
                                 
                                 <br /><br /><?php echo $city.", ".$country;?></p>
                                 <p>
-                                        <?php if(!empty($summary)){
-
-                                                echo $summary." <a href='$loanprurl'>Read More</a>";
-
-                                        }else{
-
-                                                if(strlen($loanuse) >200){
-
-                                                        echo substr($loanuse,0,200)." <a href='$loanprurl'>Read More</a>";
+                                    <?php echo substr($loanuse,0,200)." <a href='$loanprurl'>Read More</a>";
                                                   
-                                                }else{
-
-                                                        echo $loanuse." <a href='$loanprurl'>Read More</a>";
-                                                }
-                                        
-                                        } ?>
+                                    ?>
                                 </p>
                                 <p><strong><?php echo $lang['loaners']['amount_requested']?>:</strong> <?php echo $amount; ?> USD<br /><strong><?php echo $lang['loaners']['interest']; ?>:</strong> <?php echo number_format($interest, 2, '.', ','); ?>%</p>
                                 <p><?php echo $statusbar ?></p>

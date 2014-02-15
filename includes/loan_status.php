@@ -240,12 +240,14 @@ $(document).ready(function() {
 					<td><strong style="font-size:16px">Total Impact: <a style='cursor:pointer' class='tt'><img src='library/tooltips/help.png' style='border-style: none;' /><span class='tooltip'><span class='top'></span><span class='middle'><?php echo $lang['loan_status']['impact_tooltip'] ?></span><span class='bottom'></span></span></a></strong></td>
 					<td style="font-size:16px">
 					<strong><?php 
-						$total_impact = $invite_details['Giftrecp_AmtLent']+$invite_details['invite_AmtLent']+$totoal_invest_amount1;
+						$total_impact = $database->getMyImpact($userid);
 							echo "USD ".number_format($total_impact, 2, '.', ',')?></Strong></td>
 				</tr>
 			</table>
 		</div>
 		<br/><br/><br/>
+
+		<!--
 		<div class="row">
 			<?php
 				include_once("./editables/profile.php");
@@ -255,7 +257,7 @@ $(document).ready(function() {
 			?>
 		</div>
 		<br/><br/>
-
+		-->
 
 
 		<h3 class="subhead"><?php echo $lang['loan_status']['act_bid']; ?><p id="active_bids" class="view-more-less">View Less</p></h3>

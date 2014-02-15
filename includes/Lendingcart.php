@@ -28,6 +28,39 @@ var google_conversion_value = 0;
 			stayOnContent: true,
 			offset: 0
 		});
+	$("#redeem_desc").hide();
+	$('#redeem').click(function() {
+		$('#redeem_desc').show();
+		});
+	$("#redeem_button").click(function() { 
+		$.ajax({
+  			url: "/updateprocess.php",
+  			type: "POST",
+  			data:
+  			{
+			  redeemCardLendingCart: 1,
+			  card_code: $("#card_code").val()
+			},
+			dataType: "text",
+  			success: function(data, textStatus, jqXHR) {
+  				$("#redeem_message td").text(
+  					"A gift card in the amount of $" + data + " has been credited to your account."
+  					).css('color', 'green');
+  				$("#amountavail").show();
+  				var currentAmountAvailable = parseFloat($("#amountavail_usd").text());
+  				var newAmountAvailable = currentAmountAvailable + parseFloat(data);
+  				$("#creditavailable").val(newAmountAvailable);
+  				$("#amountavail_usd").text(Number(newAmountAvailable).toFixed(2));
+  				$("#redeem_message").show();
+  				$("#paypal_donation_cart").keyup();
+  			},
+  			error: function(jqXHR, textStatus, errorThrown) {
+  				$("#redeem_message td").text(jqXHR.responseText).css('color', 'red');
+  				$("#redeem_message").show();
+  			}
+			}); 
+		return false;
+	});
 });
 </script>
 <script type="text/javascript" src="includes/scripts/generic.js?q=<?php echo RANDOM_NUMBER ?>"></script>
@@ -240,7 +273,7 @@ if(!empty($Lendingcart) && $cont == 0 ) {
 					<td style="text-align:left">
 						<input type="text"  name="paypal_donation" id="paypal_donation_cart" value="<?php echo $donation?>">
 					</td>
-					<td><a href="javascript:void()" id='nodonation' >No donation</a></td>
+					<!-- <td><a href="javascript:void()" id='nodonation' >No donation</a></td> -->
 				</tr>
 				<tr height="20px"></tr>
 				
@@ -249,7 +282,32 @@ if(!empty($Lendingcart) && $cont == 0 ) {
 					<td ><strong>USD <span id="tot_amt_cart"><?php echo number_format($totAmt, 2, ".", ",");?></span></strong></td>
 					<td></td>
 				</tr>
+
+				<tr height="30px"></tr>
+
+					<tr>
+						<td colspan="3">
+							<div id="redeem" style="cursor:pointer;" ><a>Redeem Gift Card</a></div>
+						</td>
+					</tr>
+				
+					
+						<tr id="redeem_desc" style="display:none">
+							<td><strong>Enter Code:</strong></td>
+							<td><input type="text" size="12" id="card_code" name="card_code" value="<?php echo $form->value("card_code"); ?>"></td>
+							<td><input type="hidden" name="redeemCard" id="redeemCard">
+							<input type="hidden" name="user_guess" value="<?php echo generateToken('redeemCard'); ?>"/>
+							<input id="redeem_button" class='btn' type="submit" value="Redeem"></td>
+						</tr>
+					
+				<tr id="redeem_message" style="display:none">
+					<td colspan="3">
+					</td>
+				</tr>
+				
+
 				<tr height="60px"></tr>
+	
 				<tr>
 					<td>Payment method(s):</td>
 					<td ></td>
@@ -264,16 +322,17 @@ if(!empty($Lendingcart) && $cont == 0 ) {
 					$submitval = 'Confirm';
 					$amtchargedfrmavail = $totAmt;
 				}?>
-				<?php if($amountavail > 0) {?>
-					<tr>
-						<td>Credit Available:<br/>
-						(Current Balance: USD <?php echo number_format($amountavail, 2, ".", ",");?>)
-						</td>
-						<td>USD <span id="chargefromcravail"><?php echo $amtchargedfrmavail?></span></td>
-						<td></td>
-					</tr>
-					<tr height="20px"></tr>
-				<?php } ?>
+
+				
+				<tr id="amountavail" <?php if($amountavail == 0) { echo "style='display: none;'"; } ?>>
+					<td>Credit Available:<br/>
+					(Current Balance: USD <span id="amountavail_usd"><?php echo number_format($amountavail, 2, ".", ",");?></span>)
+					</td>
+					<td>USD <span id="chargefromcravail"><?php echo $amtchargedfrmavail?></span><br/><br/><br/></td>
+					<td></td>
+				</tr>
+					
+				
 				<tr id='amtTochargedPaypalrow' style='<?php echo $displayrow?>'>
 					<td>PayPal or Credit Card:</td>
 					<td>USD <span id='amtTochargedPaypal'> <?php echo number_format(($paypal_amt), 2, ".", ",");?></span></td>

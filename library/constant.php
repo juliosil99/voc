@@ -253,5 +253,16 @@ define("PROJECTID","PJ3e913d700ca3a696ac6b1a324c0943b3");
 define("PHONE_ID","PN6a83fb89665d4447");	// update the phone id as per julia mail on 27-11-13
 define("SHIFT_SCIENCE_KEY","e33ffd8ca8b19175"); // Shift Science API KEY
 
-define("MIXPANEL_PROJECT_TOKEN", "8c840139721b8d829c91d1c7aff93c2e"); //Mixpanel project token
- 
+//Mailgun variables
+define("MAILGUN_API_KEY","key-8d4q5ajm6610qecy8o9-4x0pnt8b8l51");
+
+//Sendwithus
+define("SENDWITHUS_API_KEY", "live_fb8f691744bd32d2e23e7f3a5a8c6179fd00d61d");
+define("SENDWITHUS_TEMPLATE_3FEATURES", "abGEAnQkjZ4gbV2TdUapun");
+define("SENDWITHUS_TEMPLATE_ACCOUNT", "MGyfaX2kfbNwrVF97xdfFB");
+define("SENDWITHUS_TEMPLATE_COMMENTS", "hug2uvwYKGymqQQgwW4ivn");
+define("SENDWITHUS_TEMPLATE_NEWS", "rAnETUAkz4qJw9Q26BQr3k");
+define("ACCOUNT_NOTIFICATIONS_TAG","Account notifications");
+define("COMMENT_NOTIFICATIONS_TAG","Comment notifications");
+define("NEWS_TAG","Zidisha news");
+define("NEW_THIS_WEEK_TAG","New this week");

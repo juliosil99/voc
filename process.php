@@ -225,7 +225,7 @@ class Process
 		$_POST_ORG=$_POST;
 		$_POST = sanitize_custom($_POST);
 
-		$reply = $session->sendBulkMails($_POST['emailaddress'], $_POST['radio_useroption'], $_POST['emailmessage'], $_POST['emailsubject']);
+		$reply = $session->sendBulkMails($_POST['emailaddress'], $_POST['radio_useroption'], $_POST['emailmessage'], $_POST['emailmessage2'], $_POST['emailmessage3'], $_POST['emailsubject'],  $_POST['emailheader'],  $_POST['image_src'],  $_POST['image_src2'], $_POST['image_src3'], $_POST['link'],  $_POST['link2'],  $_POST['link3'],  $_POST['anchor'],  $_POST['anchor2'],  $_POST['anchor3'],  $_POST['footer'],  $_POST['button_url'],  $_POST['button_text']);
 		if(!$reply){
 			$_SESSION['value_array'] = $_POST_ORG;
 			$_SESSION['error_array'] = $form->getErrorArray();
@@ -296,12 +296,12 @@ class Process
 						if(isset($_GET["language"]))
 						{
 							$language = $_GET["language"];
-							$ref=SITE_URL.$language.'/index.php?p=19';
+							$ref=SITE_URL.$language.'/index.php?p=119';
 						}
 						else
-							$ref=SITE_URL.'index.php?p=19';
+							$ref=SITE_URL.'index.php?p=119';
 					}else{
-						$ref=SITE_URL.'index.php?p=1&sel=4&t=2';	
+						$ref=SITE_URL.'index.php?p=119';	
 					}
 				}
 				else
@@ -310,17 +310,19 @@ class Process
 					if(isset($_GET["language"]))
 					{
 						$language = $_GET["language"];
-						$ref=SITE_URL.$language.'/index.php?p=19';
+						$ref=SITE_URL.$language.'/index.php?p=119';
 					}
 					//12-19-2012 Anupam checks if isset($paramerter['fg']) if it is logging in for forgiving his loan he should redirected to the page he comes from 
 					else if(!isset($paramerter['fg'])) {
-						$ref=SITE_URL.'index.php?p=19';
+						$ref=SITE_URL.'index.php?p=119';
 					}
 				}
-			}
-			if($session->userlevel==BORROWER_LEVEL)
-			{
-				$ref= SITE_URL."index.php?p=50";
+
+				// if user tries to connect with facebook
+				if(isset($_POST["fb_connect"])){
+					$database->facebookConnect($_POST['facebook_id'], $session->userid);
+				}
+				
 			}
 			if($session->userlevel==ADMIN_LEVEL){ 
 				$page=array('0','3','4','47','48');
@@ -367,6 +369,17 @@ class Process
 					$ref= SITE_URL.$language.$ref2;
 				}
 			}
+			if($session->userlevel==BORROWER_LEVEL)
+			{
+				if(isset($_GET["language"]))
+					{
+						$language = $_GET["language"];
+						$ref=SITE_URL.$language.'/index.php?p=50';
+					}
+					else {
+						$ref=SITE_URL.'index.php?p=50';
+					} 
+			}
 			header("Location: $ref");
             exit;
 		} 
@@ -411,6 +424,7 @@ class Process
 			$_POST["username"]=$_POST["lusername"];
 			$_POST["password"]=$_POST["lpass1"];
 			$this->subLogin();
+			header('Location: index.php?p=1&sel=4&t=2');
 			exit;
 		}
 		else

@@ -2,11 +2,10 @@
 $lang['loanstatn']['about_b']="About Borrower";
 $lang['loanstatn']['annual_income'] = "Annual Income"; 
 $lang['loanstatn']['amt_stil_need']="Amount Still Needed";
-$lang['loanstatn']['amt_bid'] ="Amount Bid"; 
-$lang['loanstatn']['amt_accept'] ="Amount Accepted";
+$lang['loanstatn']['amt_accept'] ="Amount";
 $lang['loanstatn']['bid_close'] ="Bidding Closes"; 
 $lang['loanstatn']['bid_amount'] ="Bid Amount";
-$lang['loanstatn']['bid_int'] ="Bid Interest"; 
+$lang['loanstatn']['bid_int'] ="Interest"; 
 $lang['loanstatn']['bsincedate'] = "Borrower Since"; 
 $lang['loanstatn']['bid_detail'] ="Bidding Details"; 
 $lang['loanstatn']['b_currency']="Borrower Currency";
@@ -47,7 +46,7 @@ $lang['loanstatn']['lheader'] ="Current Loan Details";
 $lang['loanstatn']['lender'] ="Lender"; 
 $lang['loanstatn']['lender_name']="Lender Name"; 
 $lang['loanstatn']['loan_status']="Loan Status"; 
-$lang['loanstatn']['lender_int'] = "Proposed Lender Interest"; 
+$lang['loanstatn']['lender_int'] = "Interest"; 
 $lang['loanstatn']['lender_int_annual'] = "Proposed Annual Interest Rate for Lenders";
 $lang['loanstatn']['req_loan_amt'] ="Requested Loan Amount"; 
 $lang['loanstatn']['loan_p_not_gen'] = "Page called without loanid or loan page is not generated yet";
@@ -84,7 +83,7 @@ $lang['loanstatn']['total_bids'] ="Total Bids";
 $lang['loanstatn']['tot_amount']="Total Amount Due";
 $lang['loanstatn']['total_reypay']="Total Repayment"; 
 $lang['loanstatn']['tot_int_due_lend']="Total Interest Due to Lenders";
-$lang['loanstatn']['totrepay_due']="Total repayments as of";
+$lang['loanstatn']['totrepay_due']="Total repaid as of";
 $lang['loanstatn']['tot_paid_amount']="Total Paid Amount";
 $lang['loanstatn']['totToPay'] = "Total Annual Interest and Fees"; 
 $lang['loanstatn']['tba']  = "Total Amount (Including Interest and Transaction Fee) to be Repaid";
@@ -107,7 +106,7 @@ All interest rates displayed on the Zidisha website are expressed as flat percen
 The expression of interest rates as flat percentages of loan principal amounts is intended to make calculation of interest amounts more intuitive for borrowers and for lenders, and to facilitate comparison with other microfinance loans in borrowers' communities, the majority of which also use the flat rate methodology to express interest rates.";
 
 $lang['loanstatn']['tooltip_crncy_risk']='Under Zidisha\'s lending model, loan values are fixed in local currency upon disbursement, and the lenders assume currency risk. Exchange rates fluctuate and this can cause the US Dollar value of the loans to either increase or decrease during the course of the repayment period, leading to monetary gains or losses for lenders. Since exchange rate fluctuations often go both ways for multiple currencies during the same time period, spreading lending activity across multiple countries may help lenders hedge against currency risk.';
-$lang['loanstatn']['webfee']  ="Borrower Transaction Fee"; 
+$lang['loanstatn']['webfee']  ="Service Fee"; 
 $lang['loanstatn']['wcomments']='Post A Comment';
 $lang['loanstatn']['chars_remain']='characters remaining';
 $lang['loanstatn']['forgive_my_share']='I would like to forgive my share of this loan.';
@@ -142,7 +141,7 @@ $lang['loanstatn']['loan_amount']  = "Enter Amount to Lend (US Dollars)";
 $lang['loanstatn']['prop_intr']  = "Select Interest to Receive";
 $lang['loanstatn']['max_intr_rate']  = "Offered Interest Rate";
 $lang['loanstatn']['currency_risk']  = "Currency Risk";
-$lang['loanstatn']['bid_success']  = "Your bid has been successfully submitted. The applicant will have the opportunity to accept all bids and receive his or her disbursement once this loan is fully funded.";
+$lang['loanstatn']['bid_success']  = "Your bid has been successfully submitted. The member will have the opportunity to accept all bids and receive his or her disbursement once this loan is fully funded.";
 $lang['loanstatn']['installment_amount']  = "Please enter the new amount you wish to pay each month. As the loan must be fully repaid within";
 $lang['loanstatn']['installment_amount2']  = "months, the minimum monthly installment is";
 $lang['loanstatn']['installment_amount_wks']  = "Please enter the new amount you wish to pay each week. As the loan must be fully repaid within";
@@ -174,21 +173,21 @@ $lang['loanstatn']['amount']='Repayment Due';
 $lang['loanstatn']['balance']='Balance Remaining';
 $lang['loanstatn']['total_repayment']='Total Repayment';
 $lang['loanstatn']['pop-upblocked_text']='This feature requires pop-ups to be enabled. Please enable pop-ups in your browser and try again. <a href="http://www.wikihow.com/Disable-Popup-Blockers">How do I enable pop-ups?</a>';
-$lang['loanstatn']['bid_success_funded'] = 'The loan will be disbursed to the applicant after he or she accepts the bids.';
+$lang['loanstatn']['bid_success_funded'] = 'The loan will be disbursed to the member after he or she accepts the bids.';
 $lang['loanstatn']['selectone'] = 'Please select one:';
 $lang['loanstatn']['proposegrperiod'] = 'Propose grace period';
 $lang['loanstatn']['redinstllment'] = 'Change installment amounts';
 $lang['loanstatn']['onbehalftext']='This loan application was posted on behalf of %bname% <br/> by %behalfname% in %behalftown%';
-$lang['loanstatn']['onbehalfNote'] = 'The creation of member profiles and loan applications is the responsibility of each applicant, and Zidisha does not post content on behalf of borrowers. Loan applicants who have difficulty using computers may choose to ask a local acquaintance for assistance in posting their applications, as long as they disclose this to lenders.
+$lang['loanstatn']['onbehalfNote'] = 'The creation of member profiles and loan applications is the responsibility of each member, and Zidisha does not post content on their behalf. Members who have difficulty using computers may choose to ask a local acquaintance for assistance in posting their applications, as long as they disclose this to lenders.
 ';
 $lang['loanstatn']['flatintrest_diff'] = 'What is the difference between flat interest rates and declining balance interest rates?';
 $lang['loanstatn']['donotforgive_confirmation'] = 'Are you sure you do not wish to forgive this loan?  Once you confirm, you will no longer be offered the option to forgive this loan.';
 $lang['loanstatn']['biding_close'] = 'If a loan is not fully funded by the expiration date, then funds that had been pledged are returned to lenders, and the applicant may start over with a new loan proposal.';
 $lang['loanstatn']['paidAmt_tooltip'] = 'The Paid Amounts displayed here are the local currency amounts received, converted to US Dollars at the exchange rate that was effective at the time the loan was disbursed.  The amounts credited to individual lenders are converted to US Dollars at the exchange rate that was effective at the time each repayment was received, and due to exchange rate fluctuations they may be more or less than the amounts displayed here.';
 $lang['loanstatn']['invited_by']='Invited By';
-$lang['loanstatn']['tooltip_invited']='This is the member who invited this applicant to join Zidisha.';
+$lang['loanstatn']['tooltip_invited']='This is the original Zidisha member who invited this member to join.';
 $lang['loanstatn']['tooltip_mentor']='Volunteer Mentors are Zidisha borrowers or residents of borrowers\' communities, who volunteer their time to assist new members to interact with our website.';
-$lang['loanstatn']['tooltip_RepayRate']='The On-Time Repayment Rate is the percentage of all monthly installments that this member has paid on time (within ten days of the due date), for all loans that he or she has taken since joining Zidisha. The number displayed in parentheses is the total number of monthly installments that have been due, over which the On-Time Repayment Rate is measured.';
+$lang['loanstatn']['tooltip_RepayRate']='The On-Time Repayment Rate is the percentage of all monthly or weekly loan repayment installments that this member has paid on time (within ten days of the due date), for all loans that he or she has taken since joining Zidisha. The number displayed in parentheses is the total number of monthly or weekly installments that have been due, over which the On-Time Repayment Rate is measured.';
 $lang['loanstatn']['viewprevloan']='View Previous Loans';
 $lang['loanstatn']['tooltip_tot_int_due_lend']="This is the annual interest rate proposed by the borrower.  Lenders may bid to finance the loan at the borrower’s proposed interest rate, or at a lower rate if they desire.  If more bids are received than the amount needed to fund the loan, the borrower will accept the bids with the lowest proposed interest rates.
 <br/><br/>
@@ -206,10 +205,10 @@ $lang['loanstatn']['acceptBid_note_ID']='In order to receive your loan disbursem
 $lang['loanstatn']['acceptBid_note']='Please enter any special instructions for your loan disbursement here (Optional):';
 $lang['loanstatn']['translate_by']='Translated by';
 $lang['loanstatn']['online_identity']='Online Identity';
-$lang['loanstatn']['tooltip_online']='This applicant has linked a personal social media account to verify online identity.';
+$lang['loanstatn']['tooltip_online']='If this member has linked a personal social media account to verify online identity, it will be displayed here.';
 $lang['loanstatn']['view_fb']='View Facebook Profile';
 $lang['loanstatn']['public_endorse']='Public Endorsement';
-$lang['loanstatn']['tooltip_endorse']='One or more of this applicant\'s online endorsers has consented to make their endorsement visible to the public.';
+$lang['loanstatn']['tooltip_endorse']='If this member has received any public online endorsements from local acquaintances, they will be displayed here.';
 $lang['loanstatn']['view_endorse']='View Endorsements';
 $lang['loanstatn']['nationalid']='National ID Card';
 $lang['loanstatn']['tooltip_nationalid']='Indicates whether this member has provided Zidisha with a copy of a government-issued identity card.';
@@ -221,4 +220,7 @@ $lang['loanstatn']['edit_bid1']='You may increase the amount or reduce the inter
 							Click';
 $lang['loanstatn']['here']= 'here';
 $lang['loanstatn']['edit_bid2']='to place a new bid.';
+$lang['loanstatn']['about']='About';
+$lang['loanstatn']['about_loan']='About This Loan';
+$lang['loanstatn']['report_violation']='Report this profile to Zidisha';
 ?>

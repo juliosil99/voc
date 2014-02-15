@@ -398,6 +398,8 @@ class genericClass
 
                 $rtn['userlevel']==LENDER_LEVEL;
 
+                $rtn['regdate']=$result['regdate'];
+
             }
 
             else if($res['userlevel']==BORROWER_LEVEL)
@@ -2404,8 +2406,6 @@ class genericClass
 
         
 
-        } 
-
 
 
         /* removing this for now because links were being used by other than the invited recipient
@@ -2430,29 +2430,24 @@ class genericClass
 
         */
 
+            $user_level = $this->getUserLevelbyid($userid);
 
+            if ($user_level == BORROWER_LEVEL){
 
-        if(!empty($res)){
+                $invited_by = $this->getInvitee($userid);
+                $session->sendInviteAlert($userid);
+                $session->getBInviteSiftData($userid,$invited_by);
 
+            } elseif ($user_level == LENDER_LEVEL){
 
+                //$session->sendLenderInviteConf($userid);
 
-            $invited_by = $this->getInvitee($userid);
-
-
-
-            $session->sendInviteAlert($userid);
-
-
-
-            $session->getBInviteSiftData($userid,$invited_by);
-
-
-
-        }
-
+            }
 
 
         return $res;
+
+        } 
 
     }
 
@@ -8362,13 +8357,11 @@ class genericClass
 
         $paiddate= $db->getOne($s , array('repaymentschedule_actual',$id2));
 
-        
 
         //limits results to installments that fell due before today and before the final payment was made
 
-        $q1="SELECT COUNT( id ) FROM  ! WHERE duedate <= ? AND duedate <= ? AND loanid =? AND userid =? AND amount >?";
-
-        $res=$db->getOne($q1, array('repaymentschedule', time(), $paiddate, $loanid, $userid, 0));
+        $q1="SELECT COUNT( id ) FROM  ! WHERE duedate <= ? AND loanid =? AND userid =? AND amount >?"; //Remove 'AND duedate <= ?' & $paiddate, on date 13-02 
+        $res=$db->getOne($q1, array('repaymentschedule', time(), $loanid, $userid, 0));
 
         return $res;
 
@@ -8604,6 +8597,19 @@ class genericClass
 
         return $fbusers;
 
+    }
+
+    function facebookConnect($facebook_id, $user_id)
+    {
+        global $db;
+        
+        $query = 'UPDATE ! set facebook_id = ? WHERE userid=?';
+        $result = $db->query($query, array('users', $facebook_id, $user_id));
+
+        if($result===DB_OK)
+            return true;
+        else
+            return false;
     }
 
 
@@ -9984,7 +9990,7 @@ class genericClass
 
         traceCalls(__METHOD__, __LINE__);
 
-        $q="SELECT loanid FROM ! WHERE borrowerid=? AND (active=3 OR active=5 OR active=2 ) "; // Added OR active=2 by mohit to use in current credit limit
+        $q="SELECT loanid FROM ! WHERE borrowerid=? AND (active=3 OR active=5) "; // Added OR active=2 by mohit to use in current credit limit
 
         $result=$db->getOne($q,array('loanapplic',$borrowerid));
 
@@ -10360,10 +10366,13 @@ class genericClass
 
         {
 
-            $q="SELECT * FROM ".TBL_BORROWER.", ".TBL_LOANAPPLIC." WHERE ".$oftype." borrowers.userid=loanapplic.borrowerid AND loanapplic.adminDelete = ? ORDER BY RAND()";
+            if($type==2){
+            $limit='limit 0,1000';
+            }else{
+            $limit='';
+            }
 
-
-
+            $q="SELECT * FROM ".TBL_BORROWER.", ".TBL_LOANAPPLIC." WHERE ".$oftype." borrowers.userid=loanapplic.borrowerid AND loanapplic.adminDelete = ? ORDER BY RAND() $limit";
             $result=$db->getAll($q, array(0));
 
         }
@@ -13944,7 +13953,13 @@ class genericClass
 
             else
 
-                $repaidPercent = $res['paidtotal']/$res['amttotal']*100;
+             $repaidPercent = $res['paidtotal']/$res['amttotal']*100;
+			 //$brwrandLoandetail['repaidPercent'] = round($repaidPercent,0);
+			 $p_rounded=round($repaidPercent);
+			 if($repaidPercent < 100 && $p_rounded>=100) {
+					$repaidPercent='99';
+					$repaidPercent=number_format($repaidPercent, 0, ".", ",");
+			 }
 
             $brwrandLoandetail['repaidPercent'] = round($repaidPercent,0);
 
@@ -14276,9 +14291,9 @@ class genericClass
 
         global $db;
 
-        $q= "select * from ! where borrowerid=? and active IN(?, ?, ?)";
+        $q= "select * from ! where borrowerid=?";
 
-        $res= $db->getAll($q, array('loanapplic', $userid,LOAN_ACTIVE,LOAN_REPAID,LOAN_DEFAULTED));
+        $res= $db->getAll($q, array('loanapplic', $userid));
 
         return $res;
 
@@ -14585,7 +14600,17 @@ class genericClass
     }
 
 
+    function getInvitedMemberJoins($userid){
 
+        global $db;
+
+        $q="select invitee_id, date, email from ! where userid=? AND invitee_id>0";
+
+        $res= $db->getAll($q, array('invites', $userid));
+
+        return $res;
+
+    }
 
 
     function getInviteCredit($userid){
@@ -14798,7 +14823,7 @@ class genericClass
 
         }
 
-        $q="select userid, username from ! where facebook_id='$facebook_id' $where order by userid limit 1";
+        $q="select userid, username, userlevel, sublevel from ! where facebook_id='$facebook_id' $where order by userid limit 1";
 
         $result=$db->getRow($q, array('users'));
 
@@ -17196,157 +17221,88 @@ class genericClass
 
     }
 
-    function getAllLenderForAutoLend()
-
-    {
-
-        global $db;
-
-        $q='SELECT *  FROM ! WHERE  active=? AND bid_time < now() - INTERVAL 15 MINUTE';
-
+  function getAllLenderForAutoLend($userid=null)
+		{	
+        global $db;		
+		if($userid==null){
+			$qry='ORDER BY last_processed limit 0,10';
+		}else{
+			$qry='AND lender_id='.$userid;
+		}
+        $q='SELECT *  FROM ! WHERE  active=?  '.$qry.'';
         $r1= $db->getAll($q, array('auto_lending', 1));
-
         return $r1;
-
     }
 
     function getSortedLoanForAutoBid($preference, $result, $desired_interest, $max_desired_interest,  $fullyFundedAll)
-
     {
-
         global $db;
-
         $loans=array();
-
         $intOffer=array();
-
         foreach($result as $key=>$row) {
-
             if(in_array($row['loanid'], $fullyFundedAll)) {
-
                 unset($result[$key]);
-
                 $GLOBALS['loanArray'] = $result;
-
                 continue;
-
             }
-
             $totBid=$this->getTotalBid($row['borrowerid'],$row['loanid']);
-
             $int = $row['interest'] - $row['WebFee'];
-
             if($totBid >= $row['reqdamt']) {
-
                 $int = $this->getAvgBidInterest($row['borrowerid'],$row['loanid']);
-
             }
-
             if($desired_interest <= $int) {
-
                 $row['intOffer'] = $int;
-
                 $loans[] = $row;
-
                 $intOffer[]=$int;
-
             }
-
         }
-
         if(!empty($loans)) {
-
             if($preference==HIGH_FEEDBCK_RATING) {
-
                 $feedback=array();
-
                 foreach($loans as $key=>$row) {
-
                     $report=$this->loanReport($row['borrowerid']);
-
                     $f=$report['feedback'];
-
                     $tf=$report['Totalfeedback'];
-
                     $loans[$key]['feedback']=$tf*$f;
-
                     $feedback[$key]=$f;
-
                     $totalfeedback[$key]=$tf;
-
                 }
-
                 array_multisort($feedback, SORT_DESC, $totalfeedback, SORT_DESC, $loans);
-
             } else if($preference==EXPIRE_SOON) {
-
                 $applydate=array();
-
                 foreach($loans as $key=>$row) {
-
                     $applydate[$key]=$row['applydate'];
-
                 }
-
                 array_multisort($applydate, SORT_ASC, $loans);
-
             } else if($preference==HIGH_OFFER_INTEREST) {
-
                 array_multisort($intOffer, SORT_DESC, $loans);
-
             } else if($preference==HIGH_NO_COMMENTS) {
-
                 $totComm=array();
-
                 foreach($loans as $key=>$row) {
-
                     $query = "select count(id) from ! where receiverid = ?";
-
                     $count=$db->getOne($query,array('zi_comment',$row['borrowerid']));
-
                     $loans[$key]['totComment']=$count;
-
                     $totComm[$key]=$count;
-
                 }
-
                 array_multisort($totComm, SORT_DESC, $loans);
-
             } else {
-
                 shuffle($loans);
-
             }
-
         }
-
         return $loans;
-
     }
 
     function addAutoLoanBid($LoanbidId, $lenderId, $brrowerid, $loanid, $Bidamount, $interestTobid)
-
     {
-
         global $db;
-
         $time=date('Y-m-d G:i:s',time());
-
         $q = "INSERT into ! (loanbid_id, lender_id, borrower_id, loan_id, amount, interest_rate, created) values (?, ?, ?, ?, ?, ?, ?)";
-
         $result = $db->query($q, array('auto_lendbids', $LoanbidId, $lenderId, $brrowerid, $loanid, $Bidamount, $interestTobid, $time));
-
         if($result===DB_OK) {
-
             return 1;
-
         }
-
         return 0;
-
     }
-
-
 
     /*
 
@@ -17994,8 +17950,6 @@ class genericClass
 
             }
 
-
-
         }
 
         $res['Giftrecp_AmtLent'] = 0;
@@ -18010,7 +17964,10 @@ class genericClass
 
         }
 
-        return $res;
+        $total_invested=$this->totalAmountLend($userid); //total amount this lender has lent for loans already funded
+        $amtinactivebids = $this->amountInActiveBidsDisplay($userid); //total amount in not yet funded bids
+        $total_impact = $total_invested + $amtinactivebids + $res['invite_AmtLent'] + $res['Giftrecp_AmtLent'];
+        return $total_impact;
 
     }
 
@@ -19526,11 +19483,8 @@ class genericClass
 
         if(!empty($bIds)) {
 
-            $time=time() - (30 * 24 * 60 * 60);
-
-            $q="SELECT * FROM zi_comment  WHERE receiverid IN($bIds) AND pub_date > $time AND status = 0 union SELECT * FROM zi_comment  WHERE senderid IN($bIds) AND pub_date > $time AND status = 0 order by id desc";
-
-            $result=$db->getAll($q);
+            $q="SELECT * FROM ! WHERE receiverid IN ($bIds) ORDER BY id DESC LIMIT ?";
+            $result=$db->getAll($q, array('zi_comment', 100));
 
         }
 
@@ -21304,13 +21258,13 @@ class genericClass
 
     }
 
-    function setGiftTransaction($userid,$order_type, $order_cost, $total_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date, $ip)
+    function setGiftTransaction($userid,$template,$order_type, $order_cost, $total_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date, $ip)
 
     {
 
         global $db;
 
-        Logger_Array("cvError",$userid,$order_type, $order_cost, $total_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date, $ip);
+        Logger_Array("cvError",$userid,$template,$order_type, $order_cost, $total_cost, $cards, $recipients, $tos, $froms, $msgs, $senders, $date, $ip);
 
         $exp_date=strtotime ('+1 year', $date);
 
@@ -21360,13 +21314,17 @@ class genericClass
 
                 $tos[$i] = stripslashes(sanitize($tos[$i]));
 
+                $template[$i] = stripslashes(sanitize($template[$i]));
+
+                $template[$i] = str_replace("image", "", $template[$i]);
+
                 $froms[$i] = stripslashes(sanitize($froms[$i]));
 
                 $msgs[$i] = nl2br(stripslashes(strip_tags(trim($msgs[$i]))));
 
-                $p="INSERT INTO ! (txn_id,order_type,card_amount,recipient_email,to_name,from_name,message,sender,date,exp_date,card_code) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+                $p="INSERT INTO ! (txn_id,template,order_type,card_amount,recipient_email,to_name,from_name,message,sender,date,exp_date,card_code) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
 
-                $res2=$db->query($p, array('gift_cards',$id,$order_type,$order_cost[$i],$recipients[$i],$tos[$i], $froms[$i], $msgs[$i], $senders[$i], $date,$exp_date, $card_code));
+                $res2=$db->query($p, array('gift_cards',$id,$template[$i],$order_type,$order_cost[$i],$recipients[$i],$tos[$i], $froms[$i], $msgs[$i], $senders[$i], $date,$exp_date, $card_code));
 
                 Logger_Array("cvError_res2",$res2);
 
@@ -22452,7 +22410,25 @@ class genericClass
 
     }
 
+    function inviteReportLenders(){
 
+        
+
+        global $db;
+
+
+
+        $q="SELECT DISTINCT lenders.userid, lenders.FirstName, lenders.LastName, lenders.City, lenders.Email, lenders.Country, u.last_login FROM ! LEFT JOIN invites as inv on inv.userid=lenders.userid LEFT JOIN users as u on u.userid=lenders.userid WHERE active=1 AND inv.userid IS NOT NULL";
+
+ 
+
+        $res= $db->getAll($q, array('lenders'));
+
+        
+
+        return $res;
+
+    }
 
 
 
@@ -23104,135 +23080,92 @@ function wasFirstInstalOnTime($userid, $loanid){
 
 }
 
-
-
-
-
 function getTotalInstalAllLoans($userid){
-
     global $db;
-
-
-
     $loans=$this->getLoansForRepayRate($userid);
-
     foreach ($loans as $loan){
-
         $loanid= $loan['loanid'];
-
         $installments=$this->getTotalInstalToday($loanid, $userid);
-
         $total_installments += $installments;
-
     }
-
-
-
     return $total_installments;
-
 }
-
-
 
 //generates array of most recent specified number of comments posted on loan profile pages
 
 function getAllRecentComments($limit)
-
     {
-
         global $db;
-
         $q="SELECT * FROM ! ORDER BY id DESC LIMIT ?";
-
         $result=$db->getAll($q, array('zi_comment', $limit));
-
         if(empty($result)){
-
             return false;
-
         }
-
         return $result;
-
     }
 
-function lastBidDetail(){
-	   	$qry='SELECT transactions.TrDate as transDate,transactions.amount,transactions.loanbid_id,transactions.userid,auto_lendbids.id,loanid FROM transactions LEFT OUTER JOIN auto_lendbids on  transactions.loanbid_id= auto_lendbids.loanbid_id WHERE transactions.txn_type='.LOAN_BID.' AND auto_lendbids.id IS NULL ORDER BY TrDate desc limit 0,1';
-		$result= mysql_query($qry);
-		$data=mysql_fetch_object($result);		
-		$lastLoan=array();
-		$lastLoan['tdDate']=$data->transDate;
-		$lastLoan['amnt']=str_replace('-','',$data->amount);
+function lastBidDetail($loanid, $lenderId){
+		global $db;
+		$q="SELECT * FROM ! WHERE lender_id=? AND loan_id=? ";
+
+		$result1=$db->getAll($q,array('auto_lendbids' ,$lenderId, $loanid ));	  
+		$count=count($result1);
 		
-		$q='SELECT bidint FROM loanbids where lenderid='.$data->userid.' AND loanid='.$data->loanid.'';
+		$limit='limit '.$count.',1';
+			
+		$qry='SELECT transactions.TrDate as transDate,transactions.amount,transactions.loanbid_id,transactions.userid,auto_lendbids.id,transactions.loanid FROM transactions LEFT OUTER JOIN auto_lendbids on  transactions.loanbid_id= auto_lendbids.loanbid_id WHERE transactions.txn_type='.LOAN_BID.' AND auto_lendbids.id IS NULL AND transactions.loanid='.$loanid.' ORDER BY TrDate DESC '.$limit.'';
+		$result= mysql_query($qry);
+		
+		$data=mysql_fetch_object($result);	
+		if(empty($data))
+		{
+			return 0;
+		}
+			
+		$lastLoan=array();
+		$lastLoan['amnt']=str_replace('-','',$data->amount);
+			$q='SELECT bidint FROM loanbids where lenderid='.$data->userid.' AND loanid='.$data->loanid.' ORDER BY bidid DESC limit 0,1';
 		$rs=mysql_query($q);
 		$ob=mysql_fetch_object($rs);
 		$lastLoan['intr']=$ob->bidint;
 		return $lastLoan;
 	}
 
+function updateAutoLend($lenderid){
+		$q='UPDATE auto_lending SET last_processed =now() WHERE lender_id='.$lenderid.' AND active=1';
+		mysql_query($q);
+}		
+		
 /* To Manage Language for country Basis By Mohit 24-01-2014 */  
 
 function languageSetting($lng_code,$country_code){
-
 		global $db;
-
-		
-
 		$p="SELECT id FROM ! where country_code=?";
-
 		$res=$db->getOne($p,array('country_lang', $country_code));
-
-
-
 		if($res==null){		
-
 			$q="INSERT INTO ! (lang_code,country_code) VALUES (?,?)";
-
 			$result=$db->query($q, array('country_lang', $lng_code, $country_code));
-
 			if($result==1){
-
 				return 1;
-
 			}else{
-
 				return 0;
-
 			}
-
 		}else{
-
 			$q="UPDATE ! SET lang_code=?,country_code=? WHERE country_code=?";
-
 			$result=$db->query($q, array('country_lang', $lng_code, $country_code,$country_code));
-
 			if($result==1){
-
 				return 1;
-
 			}else{
-
 				return 0;
-
 			}
-
 		}	
-
 	}	
 
-
-
 function getLanguage($count_code=null){	
-
 		global $db;
-
 		$p="SELECT lang_code FROM ! where country_code=?";
-
 		$res=$db->getOne($p,array('country_lang', $count_code));
-
 		return $res;
-
 }
 
 
@@ -23240,26 +23173,84 @@ function getProfileImage($userid){
          global $db;
          $brw=$this->getBorrowerDetails($userid);
          $fb_data = unserialize(base64_decode($brw['fb_data']));
-         if (file_exists(USER_IMAGE_DIR.$userid.".jpg")){ 
-     
-             $imagesrc=SITE_URL."library/getimagenew.php?id=".$userid;
-        
-         }else if( ! empty($fb_data['user_profile']['id'])){ //case where borrower has not uploaded own photo but has linked FB account, use FB profile
-                             
-             $imagesrc="https://graph.facebook.com/".$fb_data['user_profile']['id']."/picture?width=9999&height=9999";
-         
+         if (file_exists(USER_IMAGE_DIR.$userid.".jpg")){  
+             $imagesrc=SITE_URL."library/getimagenew.php?id=".$userid;  
+         }else if( ! empty($fb_data['user_profile']['id'])){ //case where borrower has not uploaded own photo but has linked FB account, use FB profile                   
+             $imagesrc="https://graph.facebook.com/".$fb_data['user_profile']['id']."/picture?width=9999&height=9999"; 
          }else{
- 
              $imagesrc="";
- 
          }
- 
          return $imagesrc;
  }
 
 
+//gets the amount of the last payment made toward this loan
+ function getLastInstallmentAmt($userid, $loanid){
+        global $db;
 
-/* End here */	
+        $r="SELECT MAX(id) FROM ! WHERE userid=? and loanid=?";
+
+        $id2= $db->getOne($r , array('repaymentschedule_actual',$userid,$loanid));
+
+        $s="SELECT paidamt FROM ! WHERE id=?";
+
+        $lastinst_amt= $db->getOne($s , array('repaymentschedule_actual',$id2));
+
+        return $lastinst_amt;
+ }
+
+
+function getUserCommentCount($userid) {
+
+        global $db;
+
+        $query = "select count(id) from ! where senderid = ?";
+
+        $commentcount = $db->getOne($query,array('zi_comment',$userid));
+
+        return $commentcount;
+
+    }
+
+
+ function getKarmaScore($userid){
+
+        $total_impact = $this->getMyImpact($userid);
+        $total_comments = $this->getUserCommentCount($userid);
+        $karma = ($total_impact / 10) + $total_comments;
+        return $karma;
+
+ }
+
+
+ function getJoinDate($userid){
+
+        global $db;
+
+        $q= 'SELECT regdate FROM ! where userid = ?';
+
+        $res = $db->getOne($q, array('users',$userid));
+
+        return $res;
+
+ }
+
+
+
+function getLenderGiftCards($userid){
+
+        global $db;
+
+        $q="select order_type, card_amount, recipient_email, to_name, gc.date, claimed from ! as gc join ! as gt on gc.txn_id = gt.id where gt.userid = ? AND gt.status = 1";
+
+        $res= $db->getAll($q, array('gift_cards', 'gift_transaction', $userid));
+
+        return $res;
+
+    }
+
+/* End here */
+
 };
 
 $database= new genericClass;

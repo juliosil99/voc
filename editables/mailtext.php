@@ -42,7 +42,7 @@ $lang['mailtext']['RecivedPayment-msg'] =
 Your lender credit balance is now USD %avail_amount%. 
 You may use this balance to make a new loan <a href="%lend_link%">here</a>.<br/><br/>
 You may view %bname%\'s loan profile page <a href="%link%">here</a>.<br/><br/>
-Thank you again for partnering with us,<br/><br/>
+Best wishes,<br/><br/>
 The Zidisha Team <br/><br/>';
 
 
@@ -100,7 +100,7 @@ Zidisha Team';
 //comment posting notification to lender
 $lang['mailtext']['comment-subject'] = 'New Message: %bname%';
 
-$lang['mailtext']['comment-msg'] = '%mname% comments on %date%<br/><br/>
+$lang['mailtext']['comment-msg'] = 'Posted by %mname% in %location%<br/><br/>
 %message% <br/><br/>
 %images% <br/><br/>
 We welcome your participation. Please click <a href=" %link% ">here</a> to view the comment and post a response.<br/><br/>
@@ -140,12 +140,25 @@ $lang['mailtext']['gift_order_msg_footer'] = 'If you have any questions or conce
 
 
 //gift card email to recipient
-$lang['mailtext']['gift_card_subject'] = 'You received a Zidisha gift card !';
+$lang['mailtext']['gift_card_subject'] = 'Zidisha gift card from %from_name%';
 
-$lang['mailtext']['gift_card_msg_body'] = "If you do not yet have a Zidisha lender account, you may redeem this gift card by entering the redemption code in the <a href='%link_1%' target='_blank'>New Account</a> page at our website.<br/><br/>".
-"If you are already registered as a lender, you may enter the redemption code in the <a href='%link_2%' target='_blank'>Add or Withdraw Funds</a> page when logged in to credit the gift card value to your account.<br/><br/>".
-"If you have any questions or concerns, please contact us by replying to this email at service@zidisha.org. Thanks and happy lending!<br/><br/>".
-"The Zidisha Team<br/>";
+$lang['mailtext']['gift_card_anonymous_subject'] = 'You received a Zidisha gift card';
+
+$lang['mailtext']['gift_card_header'] = '%from_name% has given you a Zidisha gift card.';
+
+$lang['mailtext']['gift_card_anonymous_header'] = 'You received a Zidisha gift card.';
+
+$lang['mailtext']['gift_card_msg_body'] = 
+"<strong>%to_name%<br/><br/>
+%message%<br/><br/>
+%from_name%</strong><br/><br/><br/>
+Use this gift card to make a loan to a small business owner from around the world.
+Communicate directly with him or her as the business you funded grows. Then relend your funds to another individual of your choice, spreading opportunity while getting to know some of the world's most remarkable entrepreneurs.
+<br/><br/>
+Amount: $%card_amount%<br/><br/>
+Redemption Code: %card_code%<br/><br/>
+<i>Redeem this card by making a loan <a href='%link%'>here</a>. You may enter the redemption code in the Lending Cart after choosing an entrepreneur to support.</i>
+";
 
 
 //lender invite email for specific loan
@@ -163,11 +176,10 @@ $lang['mailtext']['promote_body3'] ="Zidisha.org is a US-based nonprofit that le
 //lender invite email - general
 $lang['mailtext']['invite_subject'] = "Invite from %name%";
 
-$lang['mailtext']['invite_body_l'] = "No intermediaries between you and the borrower = lower cost for the borrower + direct connection with the entrepreneur you are helping.";
+$lang['mailtext']['invite_body_l'] = 'No intermediaries between you and the borrower = lower cost for the borrower + direct connection with the entrepreneur you are helping.';
 
 $lang['mailtext']['invite_body'] =
-"%user_msg%<br/><br/>
-<a href='%zidisha_link%'>www.zidisha.org</a>";
+"%user_msg%";
 
 
 //withdraw request confirmation
@@ -347,14 +359,25 @@ This is a notification that your Zidisha loan application is due to expire on %e
 Zidisha provides a platform whereby our members can raise loans by proposing mutually beneficial terms to lenders.  Lenders choose from many competing applications, and your loan will only be funded if it succeeds in appealing to lenders.  Here are some tips members have used to make their loan applications more attractive to lenders:<br/><br/>
 <ol>
 	<li>
-		Ensure that your photo is of good quality. Most people prefer to have lending relationships with people whose photos are clear, close up, and smiling. Photos that are not well lit, too far away or not smiling are less attractive to lenders. You may change your photo by uploading a new one in the <a href="%editlink%">Edit Profile</a> page.	
-	</li><br/> 
-	<li>
-		Consider your offered interest rate. Most lenders try to ensure their loan funds earn enough interest to compensate for their money transfer costs and inflation, so that their value is preserved for future borrowers who will receive the funds that you repay.  You may increase your offered interest in the <a href="%loanappliclink%">Loan Application</a> page after your loan application is posted for funding.
-	</li><br/> 
-	<li>
-		Make sure that you include enough detail in your "Use of Loan" description.  Lenders want to know exactly what items will be bought with the loan, and exactly how this will help your business grow.  You may edit this field in the <a href="%loanappliclink%">Loan Application</a> page as well.
+		<strong>Ensure you are smiling in your profile photo.  Members who smile in their photos are five times more likely to have their loans funded.</strong> 
+Ensure that your photo is of good quality. Most people prefer to have lending relationships with people whose photos are clear, close up, and smiling. Photos that are not well lit, too far away or not smiling are less attractive to lenders. You may change your photo by uploading a new one in the <a href="index.php?p=13">Edit Profile</a> page.
 	</li>
+	<br/>
+
+	<li>
+		Offer a high enough interest rate to lenders. If you have not yet built up a high on-time repayment rate score, then it will probably be necessary to offer a higher interest rate to make your application attractive to potential lenders.
+	</li>
+	<br/>
+
+	<li>
+		 Use a title that tells lenders what you will do or purchase with the loan funds. 
+	</li>
+	<br/>
+	
+	<li>
+		 Make sure that you include a clear explanation in your "Use of Loan" description. Lenders want to know exactly what items will be bought with the loan, and exactly how this will help your business grow. 
+	</li>
+	<br/>
 </ol>
 <br/><br/>
 Best wishes,<br/><br/>
@@ -381,10 +404,6 @@ Should you desire to maintain access to your lender credit balance, simply log i
 Thanks so much for having participated in our lending community, and for helping to extend life-changing opportunities to some of the world\'s most marginalized entrepreneurs.<br/><br/>
 Best regards,<br/><br/>
 Zidisha Team';
-
-
-//invite link
-$lang['mailtext']['invite_link'] = "Check out <a href='%zidisha_link%' target='_blank'>www.zidisha.org</a> to learn more.";
 
 
 //lending group comment notification
@@ -585,4 +604,22 @@ Zidisha Team";
 
 $lang['mailtext']['eligible_invite_sms']="Congratulations! You now qualify for the Zidisha invite program. To participate, login to your account at Zidisha.org and follow the invite instructions.";
 
+
+//confirmation sent to VMs of new applicants 
+$lang['mailtext']['vm_confirmation_subject']="New assigned member: %bname%";
+
+$lang['mailtext']['vm_confirmation']="Dear %uname%,<br/><br/>
+%bname% has applied to join Zidisha and has selected you as a Volunteer Mentor. We encourage you to review %bname%'s profile here: %link%<br/><br/>
+If you have any concerns about the information %bname% has provided, please let us know by replying to this email.<br/><br/>
+Thank you,<br/><br/>
+Zidisha Team";
+
+
+//confirmation sent to invitors of new lenders 
+$lang['mailtext']['lender_invite_conf_subject']="Your invite to %imail% is accepted";
+
+$lang['mailtext']['lender_invite_conf']="
+The invite you sent to %imail% has just been accepted. Zidisha has a new member!<br/><br/>
+Watch your total impact grow with each loan that happens because of your action.<br/><br/>
+";
 ?>

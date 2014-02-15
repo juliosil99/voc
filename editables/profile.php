@@ -103,7 +103,8 @@ $lang['profile']['posted_by']='Loan Profile Posted By';
 $lang['profile']['endorsed']='Endorsers';
 $lang['profile']['online_identity']='Online identity';
 $lang['profile']['invited_text']="If you would like help in communicating with %brwr_name%, you may post a message in the profile page of the member who invited %brwr_name% to join Zidisha, %invitedby%. <a style='cursor:pointer' class='tt'><img src='library/tooltips/help.png' style='border-style: none;' /><span class='tooltip'><span class='top'></span><span class='middle'>%invited_tooltip%</span><span class='bottom'></span></span></a></strong>";
-$lang['profile']['vm_comment_text']="If you would like help in communicating with %brwr_name%, you may post a message in the profile page of %brwr_name%'s Volunteer Mentor, <a href='%vm_url%#comment-section' target='_blank'>%vm_name%</a>. <a style='cursor:pointer' class='tt'><img src='library/tooltips/help.png' style='border-style: none;' /><span class='tooltip'><span class='top'></span><span class='middle'>%vm_tooltip%</span><span class='bottom'></span></span></a></strong>";
+$lang['profile']['vm_comment_text']="If you would like help in communicating with %brwr_name%, you may post a message in the profile page of %brwr_name%'s Volunteer Mentor, %mentor%. <a style='cursor:pointer' class='tt'><img src='library/tooltips/help.png' style='border-style: none;' /><span class='tooltip'><span class='top'></span><span class='middle'>%vm_tooltip%</span><span class='bottom'></span></span></a></strong>";
+$lang['profile']['inv_vm_text']="If you would like help in communicating with %brwr_name%, you may post a message in the profile page of the member who invited %brwr_name% to join Zidisha, %invitedby%, <a style='cursor:pointer' class='tt'><img src='library/tooltips/help.png' style='border-style: none;' /><span class='tooltip'><span class='top'></span><span class='middle'>%invited_tooltip%</span><span class='bottom'></span></span></a></strong> or in the profile page of %brwr_name%'s Volunteer Mentor, %mentor%. <a style='cursor:pointer' class='tt'><img src='library/tooltips/help.png' style='border-style: none;' /><span class='tooltip'><span class='top'></span><span class='middle'>%vm_tooltip%</span><span class='bottom'></span></span></a></strong>";
 $lang['profile']['volunteer_mentor']='Volunteer Mentor';
 $lang['profile']['tooltip_mentor']='Volunteer Mentors are Zidisha borrowers or residents of borrowers\' communities, who volunteer their time to assist new members to interact with our website.';
 $lang['profile']['self_vm']='Serving as Volunteer Mentor for <a>%vm_member% other members</a>';
@@ -116,4 +117,6 @@ $lang['profile']['endorser_fb']='View Facebook Profile';
 $lang['profile']['endorser_know']='How do you know ';
 $lang['profile']['endorser_conf']='What makes you confident that ';
 $lang['profile']['endorser_conf2']=' can be entrusted with a loan from our community?';
+$lang['profile']['karma']='Karma';
+$lang['profile']['karma_tooltip']='Karma is calculated on the basis of the total amount lent by the new members this member has recruited to Zidisha via email invites or gift cards, the number of comments this member has posted in the Zidisha website, and the total amount lent by this member.';
 ?>

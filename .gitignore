@@ -9,6 +9,10 @@
 # Global variables
 library/constant.php
 
+# Smarty Cache Folders
+extlibs/smarty/templates_c/
+extlibs/smarty/cache/
+
 # Log files
 zidisha_contents/
 

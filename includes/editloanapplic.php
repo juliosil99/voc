@@ -97,7 +97,12 @@ else
 						$grace_p = $form->value('gperiod');
 					$webfee=number_format($loandata['WebFee'],0,'.','');//website fee rate
 					$maxLoanAppInterest=($database->getAdminSetting('maxLoanAppInterest') + $database->getAdminSetting('fee'));
-					$usdmaxBorrowerAmt = $session->getCurrentCreditLimit($session->userid,true);//website fee rate
+					if($loanstatus == LOAN_OPEN){
+						$usdmaxBorrowerAmt = $session->getCurrentCreditLimit($session->userid,false);//website fee rate
+					}else{
+						$usdmaxBorrowerAmt = $session->getCurrentCreditLimit($session->userid,true);//website fee rate
+					}
+					
 					$usdminBorrowerAmt=$database->getAdminSetting('minBorrowerAmt');//website fee rate
 					$maxBorrowerAmt= ceil($usdmaxBorrowerAmt); /* It is in native currency */
 					$minBorrowerAmt= ceil(convertToNative($usdminBorrowerAmt, $rate));
@@ -278,7 +283,7 @@ echo $lang['loanapplic']['note_amt_pr']; ?>
 									<tr>
 										<td colspan="3">
 											<br /><?php echo $lang['loanapplic']['summary'];?><br /><br/>
-											<textarea name="summary" style="width:100%; height:50px" maxlength="200"><?php	echo $summary; ?></textarea>
+											<input style="width:500px" type="text" name="summary" maxlength="50" value="<?php echo $summary;?>" /><br/>
 											<br />
 											<?php echo $form->error('summary') ?>
 										</td>
