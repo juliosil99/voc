@@ -94,6 +94,7 @@
 
 	// If it's a new style page, use this:
 	$smarty->assign('body_class', 'default');
+	$smarty->assign('SITE_URL', SITE_URL);
 	
 	if ($page == 0) {
 		$smarty->assign('body_class', 'home');
@@ -110,7 +111,7 @@
 	} elseif ($page == 48) {
 		$smarty->assign('body_class', 'why-zidisha');
 		$smarty->display('why_zidisha.tpl');		
-	} elseif ($page ==67) {
+	} elseif ($page == 67) {
 		$smarty->assign('body_class', 'interns');
 		$smarty->display('interns.tpl');
 	}
