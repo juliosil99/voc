@@ -220,7 +220,7 @@ header .socials li a.youtube:hover{
 
 #menu{
 	width: 100%;
-	padding: 22px 0 0 0;
+	padding: 22px 0 10px 0;
 	margin: 0;
 	position: relative;
 	z-index: 999;

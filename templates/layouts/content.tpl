@@ -23,12 +23,6 @@
 		{include file='_header.tpl'}
 		{include file='_menu.tpl'}
 	{/nocache}
-    
-    <div id="featured">
-      <div class="wrapper">
-        <h1>{block name=title}Default Page Title{/block}</h1>
-      </div>
-    </div><!-- /featured -->
 
     <div class="wrapper {block name=classname}{/block}">
       <div id="content">
